@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#ffb3d9">
+<title>COLOR MIND 3D</title>
+<script src="https://www.youtube.com/game_api/v1"></script>
+<script src="playables-sdk.js"></script>
+<style>
+:root{--ink:#2b2159;--c1:#ffd6ec;--c2:#ffb3d9;--c3:#fff1a8;--ac:#ff5fa8;--r:#ff4d5e;--b:#2f80ff;--g:#22c55e;--y:#ffd028;--p:#9b5cf6;--o:#ff8a1f;
+--font:ui-rounded,"SF Pro Rounded","Nunito","Baloo 2","Arial Rounded MT Bold","Trebuchet MS","Noto Sans","Noto Sans Devanagari","Noto Sans Bengali","Noto Sans Tamil","Noto Sans Telugu","Noto Sans Kannada","Noto Sans Malayalam","Noto Sans Gujarati","Noto Sans Gurmukhi","Noto Sans Oriya","Noto Naskh Arabic",system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;overflow:hidden;background:#1a1238;touch-action:manipulation}
+body{font-family:var(--font);font-weight:800;color:var(--ink);user-select:none;-webkit-user-select:none}
+button{font:inherit;font-weight:900;color:inherit;border:0;cursor:pointer;background:none;padding:0}
+button:focus-visible{outline:4px solid #fff;outline-offset:2px}
+#app{position:fixed;inset:0;margin:0 auto;width:min(100vw,62vh);width:min(100vw,62dvh);z-index:1;background:linear-gradient(165deg,var(--c1),var(--c2) 55%,var(--c3));transition:background .6s;overflow:hidden}
+#app.paused .screen *,#app.paused .bg i,#app.paused .tex{animation-play-state:paused!important}
+.bg{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.bg i{position:absolute;display:block;border-radius:50%;background:radial-gradient(circle at 30% 28%,#fffd,#fff6 38%,#fff1 72%);animation:float var(--d,12s) ease-in-out infinite alternate;opacity:.9}
+.bg i:nth-child(3n){border-radius:30%;transform:rotate(25deg)}
+.bg i:nth-child(4n){clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+@keyframes float{to{transform:translate(var(--x,30px),var(--y,-40px)) rotate(40deg)}}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));overflow-y:auto;overflow-x:hidden}
+.screen.on{display:flex;animation:scrIn .35s ease both}
+@keyframes scrIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.wrap{width:min(560px,100%);display:flex;flex-direction:column;align-items:center;margin:auto 0}
+/* ---------- buttons ---------- */
+.btn{--b:var(--ac);--bd:color-mix(in srgb,var(--b) 62%,#000);display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(180deg,color-mix(in srgb,var(--b) 80%,#fff),var(--b));color:#fff;text-shadow:0 2px 0 #0003;border-radius:20px;padding:14px 28px;font-size:clamp(18px,5vw,24px);box-shadow:0 7px 0 var(--bd),0 14px 22px #0003,inset 0 3px 0 #fff6;transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(6px);box-shadow:0 1px 0 var(--bd),0 4px 8px #0003,inset 0 3px 0 #fff6}
+.btn.big{font-size:clamp(24px,7vw,34px);padding:16px 44px;border-radius:26px;animation:breathe 1.6s ease-in-out infinite}
+.btn.ghost{--b:#7a6cff}.btn.sm{font-size:16px;padding:10px 18px;border-radius:16px}
+@keyframes breathe{50%{transform:scale(1.06)}}
+.ib{width:48px;height:48px;border-radius:15px;background:#fff;box-shadow:0 5px 0 #0002,inset 0 -3px 0 #0001;font-size:22px;display:grid;place-items:center;transition:transform .08s}.ib:active{transform:translateY(4px)}.pbars{display:flex;gap:5px}.pbars i{width:6px;height:20px;border-radius:3px;background:var(--ink)}
+/* ---------- title ---------- */
+.logo{display:flex;flex-wrap:wrap;justify-content:center;gap:0 .35em;font-size:clamp(40px,13vw,76px);line-height:1.02;font-weight:1000;text-align:center;filter:drop-shadow(0 6px 0 #0002)}
+.logo span{display:inline-block;animation:wob 2.2s ease-in-out infinite;-webkit-text-stroke:3px #fff;paint-order:stroke fill;text-shadow:0 5px 0 rgba(0,0,0,.18)}
+@keyframes wob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-8px) rotate(3deg)}}
+.tagline{margin:10px 0 0;font-size:clamp(12px,3.4vw,16px);letter-spacing:.28em;font-weight:900;opacity:.75}
+.mascot{width:100%;height:100%;overflow:visible;display:block}
+.mw{width:clamp(130px,34vw,200px);aspect-ratio:1;animation:hop 1.6s ease-in-out infinite}.mw.s{width:62px;animation:none}
+@keyframes hop{0%,100%{transform:translateY(0) scale(1,1)}45%{transform:translateY(-16px) scale(.96,1.05)}55%{transform:translateY(-16px)}85%{transform:translateY(0) scale(1.06,.94)}}
+.eyes{transform-origin:50px 52px;animation:blink 4s infinite}@keyframes blink{0%,94%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+.m{display:none}.mood-happy .m-happy,.mood-sad .m-sad,.mood-think .m-think{display:block}
+.mood-sad .mbody{animation:droop 1s ease-in-out infinite alternate;transform-origin:50px 90px}@keyframes droop{to{transform:rotate(-3deg) scaleY(.97)}}
+.titlebtns{display:flex;gap:12px;margin-top:22px}
+/* ---------- profile ---------- */
+.h1{font-size:clamp(26px,7vw,40px);font-weight:1000;text-align:center;margin:0 0 6px;text-shadow:0 3px 0 #fff8}.sub{opacity:.75;text-align:center;font-size:clamp(14px,3.8vw,18px);margin:0 0 16px}
+.cards{display:grid;gap:12px;width:100%}
+.pcard{display:flex;align-items:center;gap:14px;text-align:left;background:#fff;border-radius:24px;padding:14px 18px;border:4px solid transparent;box-shadow:0 7px 0 #0002;transition:transform .1s}
+.pcard:active{transform:translateY(5px);box-shadow:0 2px 0 #0002}.pcard.sel{border-color:var(--ac)}
+.pcard .e{font-size:44px;filter:drop-shadow(0 3px 0 #0002)}.pcard b{display:block;font-size:clamp(20px,5.5vw,26px)}.pcard small{font-size:clamp(12px,3.4vw,15px);opacity:.7;font-weight:800}
+/* ---------- map ---------- */
+.mapwrap{width:min(560px,100%);margin:auto;display:flex;flex-direction:column}.nextpanel{display:flex;align-items:center;gap:10px;margin-top:18px}.nextpanel .mw.s{width:76px;flex:none}.nextpanel .bubble{font-size:clamp(15px,4.2vw,19px)}
+.maptop{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.pill{background:#fff;border-radius:999px;padding:8px 16px;font-size:16px;box-shadow:0 4px 0 #0002;display:flex;gap:6px;align-items:center;white-space:nowrap}
+.hero{display:flex;align-items:center;gap:14px;background:#fff9;border:3px solid #fff;border-radius:28px;padding:14px 18px;box-shadow:0 8px 0 #0001;margin-bottom:12px}
+.hero .wi{font-size:clamp(46px,13vw,68px);filter:drop-shadow(0 5px 0 #0002);animation:hop 2.4s ease-in-out infinite}
+.hero .wn{font-size:clamp(22px,6.4vw,32px);font-weight:1000;line-height:1.1}.hero .wk{font-size:12px;letter-spacing:.2em;opacity:.65}
+.bar{height:14px;background:#0001;border-radius:99px;margin-top:8px;overflow:hidden;box-shadow:inset 0 2px 3px #0002}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ac),#ffd028);border-radius:99px;transition:width .5s}
+.lgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(7px,2.4vw,12px)}
+.lt{position:relative;aspect-ratio:.86;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:clamp(22px,6.4vw,32px);font-weight:1000;transition:transform .1s;color:#fff;text-shadow:0 2px 0 #0003}
+.lt .sts{font-size:clamp(9px,2.6vw,13px);letter-spacing:1px;color:#ffd028;text-shadow:0 1px 0 #0005;height:1.2em}.lt .sts u{text-decoration:none;color:#fff5}
+.lt.open{background:linear-gradient(180deg,color-mix(in srgb,var(--ac) 70%,#fff),var(--ac));box-shadow:0 6px 0 color-mix(in srgb,var(--ac) 60%,#000),inset 0 3px 0 #fff6}
+.lt.done{background:linear-gradient(180deg,#fff,#fff6e0);color:var(--ink);text-shadow:none;box-shadow:0 6px 0 #0002,inset 0 -4px 0 #ffd02866}
+.lt.cur{animation:breathe 1.2s ease-in-out infinite}
+.lt.locked{background:#fff6;color:#0004;text-shadow:none;box-shadow:0 5px 0 #0001;cursor:default}.lt:not(.locked):active{transform:translateY(5px)}
+.pager{display:flex;align-items:center;justify-content:center;gap:14px;margin:16px 0 4px}
+.pager .ib:disabled{opacity:.3}.dotsw{display:flex;gap:6px}.dotsw i{width:10px;height:10px;border-radius:50%;background:#fff8}.dotsw i.on{background:var(--ac);transform:scale(1.35)}
+/* ---------- intro ---------- */
+.card{background:#fff;border-radius:32px;padding:clamp(20px,5vw,34px);text-align:center;box-shadow:0 10px 0 #0002,0 22px 40px #0002;width:100%;position:relative}
+.eyebrow{font-size:13px;letter-spacing:.25em;opacity:.6}.mission{font-size:clamp(30px,9vw,50px);font-weight:1000;line-height:1.05;margin:8px 0;color:var(--ac);-webkit-text-stroke:0;text-shadow:0 4px 0 #0001}
+.inst{font-size:clamp(16px,4.4vw,21px);line-height:1.4;margin:0 0 18px;opacity:.85;font-weight:800}
+.ribbon{position:absolute;top:-14px;right:-8px;background:#ffd028;border-radius:14px;padding:7px 16px;transform:rotate(7deg);box-shadow:0 5px 0 #c99a00;font-size:16px;animation:breathe 1s infinite}
+.introm{width:96px;margin:-62px auto 6px}
+/* ---------- play ---------- */
+#play{padding-bottom:max(12px,env(safe-area-inset-bottom))}.pl{width:min(640px,100%);margin:0 auto;display:flex;flex-direction:column;flex:1;min-height:0}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:8px}.ttl{flex:1;text-align:center}.ttl b{font-size:18px;letter-spacing:.06em}
+.dots{display:flex;gap:6px;justify-content:center;margin-top:5px}.dots i{width:clamp(18px,6vw,30px);height:10px;border-radius:9px;background:#fff9;box-shadow:inset 0 2px 2px #0002;transition:.3s}.dots i.done{background:#2fcf91}.dots i.cur{background:#fff;box-shadow:0 0 0 3px var(--ac)}
+.hearts{display:flex;gap:2px;min-width:46px;justify-content:flex-end;font-size:24px;line-height:1}.hearts b{color:#ff3b6b;text-shadow:0 2px 0 #0003;transition:.3s}.hearts b.off{color:#0003;transform:scale(.7)}.hearts b.pop{animation:pop .5s}
+.coach{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.bubble{flex:1;background:#fff;border-radius:20px;padding:10px 16px;font-size:clamp(17px,4.8vw,24px);line-height:1.2;position:relative;box-shadow:0 5px 0 #0002;min-height:52px;display:flex;align-items:center;animation:pop .35s}
+.bubble:before{content:"";position:absolute;left:-9px;top:50%;margin-top:-9px;border:9px solid transparent;border-left:0;border-right-color:#fff}
+.body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:clamp(10px,2.4vh,18px);min-height:0}
+.stage{background:#fffb;border:4px solid #fff;border-radius:28px;padding:clamp(12px,3vw,20px);box-shadow:0 8px 0 #0001,inset 0 -6px 0 #0001;display:flex;flex-wrap:wrap;gap:clamp(8px,2vw,14px);justify-content:center;align-items:center;min-height:clamp(120px,25vh,230px);perspective:700px;transition:.2s}
+.stage.dark{background:var(--ink);border-color:#fff}.stage.shake{animation:shake .4s}
+.stage.grid{display:grid;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr));justify-items:center;align-items:center;width:100%}
+.tile{width:clamp(50px,13.5vw,80px);aspect-ratio:1/1.08;border-radius:18px;background:linear-gradient(180deg,#fff,#f3efff);box-shadow:0 6px 0 #0002,inset 0 -4px 0 #0001;display:grid;place-items:center;font-size:clamp(28px,8vw,46px);transform:rotateX(8deg);transition:opacity .25s;line-height:1}
+.tile.sm{width:clamp(40px,10.5vw,60px);font-size:clamp(22px,6vw,34px);border-radius:14px}
+.tile.pre{opacity:0;transform:scale(0)}.tile.pop{animation:tpop .5s both}.tile.flip{animation:flip .4s both}.tile.covered{background:linear-gradient(180deg,var(--ac),color-mix(in srgb,var(--ac) 70%,#000));color:#fff}.qm{font-size:1.1em;text-shadow:0 3px 0 #0003}
+.tile.vanish{animation:vanish .45s both}.tile.empty{background:#0001;box-shadow:inset 0 4px 8px #0002;border:3px dashed #0003}.tile.empty:after{content:"?";opacity:.35}
+.tile.tap{cursor:pointer;width:100%;max-width:92px}.tile.tap:active{transform:rotateX(8deg) translateY(4px)}
+.tile.right{background:linear-gradient(180deg,#b8ffd9,#2fcf91);animation:tpop .5s both;box-shadow:0 0 0 5px #fff,0 0 24px #2fcf91}.tile.wrong{background:#ffb3bf;animation:shake .4s}.tile.gone{opacity:.2;pointer-events:none}
+.tile.num{font-weight:1000;font-size:clamp(26px,8vw,44px)}.tile.q{background:linear-gradient(180deg,#ffe98a,#ffd028)}
+.tile.shade{max-width:none;aspect-ratio:1;border-radius:16px;box-shadow:0 5px 0 #0003;transform:none}
+@keyframes tpop{0%{transform:scale(0) rotate(-25deg)}65%{transform:scale(1.25) rotate(6deg)}100%{transform:rotateX(8deg) scale(1)}}
+@keyframes flip{50%{transform:rotateY(90deg) scale(1.05)}100%{transform:rotateX(8deg)}}
+@keyframes vanish{40%{transform:scale(1.3);filter:brightness(1.4)}100%{transform:scale(0) rotate(180deg);opacity:0}}
+@keyframes shake{20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+@keyframes pop{0%{transform:scale(.7);opacity:0}70%{transform:scale(1.08)}100%{transform:none;opacity:1}}
+.sh{display:block;width:62%;aspect-ratio:1;background:var(--c);filter:drop-shadow(0 3px 0 #0003)}.sh.circle{border-radius:50%}.sh.square{border-radius:16%}.sh.tri{clip-path:polygon(50% 6%,96% 92%,4% 92%)}.sh.diamond{clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}.sh.hex{clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%)}.sh.star{clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+.sw{display:block;width:1.25em;height:1.25em;border-radius:50%;background:var(--c);border:4px solid #fff;box-shadow:0 3px 0 #0003,inset 0 -4px 0 #0002}.sw.wh{border-color:#d9d4f0}
+.bigtxt{font-size:clamp(46px,15vw,92px);font-weight:1000;letter-spacing:.04em;text-shadow:0 4px 0 #0005}.eq{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px 8px;font-size:clamp(24px,7vw,40px);font-weight:1000;width:100%;line-height:1.15}.eq b{background:var(--ac);color:#fff;border-radius:12px;padding:0 12px;min-width:1.5em;text-align:center}.eq.ask{margin-top:6px;padding-top:10px;border-top:4px dotted #0002}
+.scatter{display:grid;grid-template-columns:repeat(var(--cols,4),minmax(0,1fr));gap:2px;width:100%;justify-items:center;align-items:center}.scatter span{font-size:clamp(28px,8vw,46px);line-height:1.2;display:block}
+.pads{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(10px,3vw,16px);width:100%;max-width:420px;margin:0 auto}.pads.p6{grid-template-columns:repeat(3,minmax(0,1fr))}
+.pad{aspect-ratio:1.25;border-radius:24px;background:var(--c);box-shadow:0 8px 0 color-mix(in srgb,var(--c) 55%,#000),inset 0 5px 0 #fff6;font-size:clamp(32px,9vw,52px);display:grid;place-items:center;transition:transform .08s,filter .12s;filter:saturate(.8) brightness(.9)}.pad.emo{background:#fff;--c:#fff}.pad:active{transform:translateY(6px)}
+.pad.lit{filter:brightness(1.35) saturate(1.3);transform:scale(1.08);box-shadow:0 0 0 6px #fff,0 0 34px var(--c),0 8px 0 color-mix(in srgb,var(--c) 55%,#000)}
+.answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(10px,2.4vw,14px)}.answers.n3 .opt:nth-child(3){grid-column:1/-1}
+.opt{--o:#ff5d73;min-height:clamp(64px,11vh,92px);border-radius:22px;background:linear-gradient(180deg,color-mix(in srgb,var(--o) 78%,#fff),var(--o));color:#fff;text-shadow:0 2px 0 #0003;font-size:clamp(28px,8vw,44px);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 0 color-mix(in srgb,var(--o) 58%,#000),0 14px 18px #0002,inset 0 4px 0 #fff5;transition:transform .08s,box-shadow .08s,opacity .25s;line-height:1}
+.opt.o1{--o:#2f80ff}.opt.o2{--o:#2fd39a;color:var(--ink);text-shadow:0 2px 0 #fff6}.opt.o3{--o:#ffd028;color:var(--ink);text-shadow:0 2px 0 #fff6}
+.opt:active{transform:translateY(7px);box-shadow:0 1px 0 color-mix(in srgb,var(--o) 58%,#000),inset 0 4px 0 #fff5}
+.opt.wait{opacity:.35;pointer-events:none;filter:grayscale(.5)}.opt.gone{opacity:.15;pointer-events:none}.opt.right{background:#2fcf91;color:#fff;animation:tpop .5s both;box-shadow:0 0 0 6px #fff,0 0 30px #2fcf91;--o:#2fcf91}.opt.wrong{background:#8d7fb0;--o:#8d7fb0;animation:shake .4s;pointer-events:none;opacity:.55}
+.bottom{display:flex;align-items:center;justify-content:space-between;margin-top:12px;min-height:50px}
+.streak{font-size:22px;color:#fff;background:linear-gradient(180deg,#ff9a3d,#ff4d5e);padding:6px 16px;border-radius:99px;box-shadow:0 4px 0 #0003;opacity:0;transform:scale(.6);transition:.25s}.streak.on{opacity:1;transform:none;animation:pop .35s}
+/* ---------- result ---------- */
+.stars{display:flex;gap:6px;justify-content:center;margin:10px 0}.stars i{font-style:normal;font-size:clamp(54px,17vw,84px);color:#0002;line-height:1;transition:.2s;filter:drop-shadow(0 4px 0 #0002)}.stars i.on{color:#ffc61a;animation:tpop .6s both}
+.stats{display:flex;justify-content:center;gap:12px;margin:8px 0 18px;flex-wrap:wrap}.stat{background:#f3efff;border-radius:16px;padding:8px 16px;font-size:15px}.stat b{display:block;font-size:22px}
+.btnrow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+/* ---------- overlays ---------- */
+.ov{position:absolute;inset:0;z-index:20;background:#2b215999;backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:18px}.ov.on{display:flex;animation:scrIn .25s both}
+.sheet{background:#fff;border-radius:30px;padding:24px;width:min(400px,100%);box-shadow:0 10px 0 #0003,0 30px 50px #0004;text-align:center;max-height:100%;overflow:auto}.sheet h2{margin:0 0 14px;font-size:30px;font-weight:1000}.sheet .btn{width:100%;margin-bottom:14px}
+.row{display:flex;align-items:center;justify-content:space-between;padding:10px 4px;font-size:19px}
+.tog{width:64px;height:36px;border-radius:99px;background:#cfc8e6;position:relative;transition:.2s;box-shadow:inset 0 3px 4px #0003}.tog:after{content:"";position:absolute;left:4px;top:4px;width:28px;height:28px;border-radius:50%;background:#fff;box-shadow:0 2px 0 #0003;transition:.2s}.tog.on{background:#2fcf91}.tog.on:after{left:32px}
+.chips{display:flex;gap:6px;margin:4px 0 12px}.chip{flex:1;background:#f3efff;border-radius:14px;padding:10px 4px;font-size:14px;border:3px solid transparent}.chip.sel{border-color:var(--ac);background:#fff}
+.fx{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden}
+.cf{position:absolute;width:11px;height:16px;border-radius:3px;animation:cf 1.3s ease-out forwards}
+@keyframes cf{0%{transform:translate(0,0) rotate(0)}35%{transform:translate(var(--dx),var(--dy)) rotate(calc(var(--r)*.4))}100%{transform:translate(calc(var(--dx)*1.4),calc(var(--dy) + 560px)) rotate(var(--r));opacity:0}}
+@media (max-height:560px) and (min-aspect-ratio:1/1){
+ .screen{padding-top:8px;padding-bottom:8px}.pl{width:100%}
+ .top{margin-bottom:4px}.coach{margin-bottom:4px}.mw.s{width:44px}.bubble{font-size:15px;min-height:40px;padding:6px 12px}
+ .body{display:grid;grid-template-columns:1.3fr 1fr;gap:12px;align-items:stretch;min-height:0}
+ .stage{min-height:0;height:100%;padding:8px;gap:6px}
+ .stage.grid{align-content:center}
+ .tile{width:clamp(34px,15vh,58px);font-size:clamp(20px,7.5vh,32px);border-radius:12px}.tile.sm{width:clamp(30px,12vh,46px);font-size:clamp(18px,6vh,26px)}
+ .tile.tap{width:100%;max-width:min(17vh,64px)}.tile.shade{max-width:none}
+ .stage.grid:has(.tile.shade){width:min(100%,calc(100vh - 178px));height:auto;aspect-ratio:1;justify-self:center;align-self:center}
+ .scatter span{font-size:clamp(20px,9vh,34px)}.bigtxt{font-size:clamp(34px,14vh,64px)}.eq{font-size:clamp(18px,7vh,30px)}
+ .pads{max-width:min(100%,60vh*1.6)}.pad{aspect-ratio:1.7;border-radius:16px}
+ .answers{align-content:center;gap:8px}.opt{min-height:clamp(46px,16vh,64px);font-size:clamp(22px,8vh,34px);border-radius:16px}
+ .bottom{margin-top:4px;min-height:48px}
+ .logo{font-size:40px}.mw{width:90px}.hero{padding:8px 14px}.wrap{margin:auto}.card{padding:16px}.mission{font-size:clamp(24px,9vh,36px)}.introm{margin-top:-46px}
+}
+@media (prefers-reduced-motion:reduce){.bg i,.logo span,.mw,.btn.big,.lt.cur,.hero .wi{animation:none!important}}
+@media (max-width:340px){.lgrid{gap:5px}.lt{border-radius:12px}}
+/* ======== v3: themes, textures, back/sound buttons, new animations ======== */
+.tex{position:absolute;inset:-120px;pointer-events:none;--tc:rgba(255,255,255,.5)}
+.tex.drift{animation:tdrift 26s linear infinite}.tex.spin{inset:-60%;animation:tspin 170s linear infinite}
+@keyframes tdrift{to{transform:translate(120px,120px)}}@keyframes tspin{to{transform:rotate(360deg)}}@keyframes spin{to{transform:rotate(360deg)}}
+#app{--txt:var(--ink);--txs:0 2px 0 #fff9}
+#app[data-prof=pro],#app[data-prof=legend]{--txt:#fff;--txs:0 2px 0 rgba(25,10,70,.4)}
+.ttl b,.h1,.sub,.tagline{color:var(--txt);text-shadow:var(--txs)}.sub,.tagline{opacity:.95}
+#app[data-prof=pro] .bg i{border-radius:24%;background:linear-gradient(145deg,#fff4,#fff0);border:2px solid #fff3;opacity:.9}
+#app[data-prof=legend] .bg i{background:none;border:3px solid #fffa;box-shadow:0 0 20px #fff9,inset 0 0 16px #fff7;opacity:.85}
+/* answer button palettes per profile */
+#app[data-prof=easy]{--o0:#ff86a0;--o1:#6cb8ff;--o2:#5fe6b4;--o3:#ffdc62;--t0:#4a1230;--t1:#0f2a55}
+#app[data-prof=pro]{--o0:#e5566f;--o1:#3f7be0;--o2:#2fd39a;--o3:#ffd028;--t0:#fff;--t1:#fff}
+#app[data-prof=legend]{--o0:#ff1f6d;--o1:#2563ff;--o2:#00e0a0;--o3:#ffe600;--t0:#fff;--t1:#fff}
+#app .opt.o0:not(.right):not(.wrong){--o:var(--o0,#e5566f);color:var(--t0,#fff)}
+#app .opt.o1:not(.right):not(.wrong){--o:var(--o1,#3f7be0);color:var(--t1,#fff)}
+#app .opt.o2:not(.right):not(.wrong){--o:var(--o2,#2fd39a);color:var(--ink);text-shadow:0 2px 0 #fff6}
+#app .opt.o3:not(.right):not(.wrong){--o:var(--o3,#ffd028);color:var(--ink);text-shadow:0 2px 0 #fff6}
+#app[data-prof=easy] .opt.o0,#app[data-prof=easy] .opt.o1{text-shadow:0 2px 0 #fff7}
+#app[data-prof=legend] .opt{box-shadow:0 8px 0 color-mix(in srgb,var(--o) 55%,#000),0 0 22px color-mix(in srgb,var(--o) 70%,transparent),inset 0 4px 0 #fff6}
+/* profile cards (each has its own theme + texture) */
+.pcard{position:relative;overflow:hidden;background-clip:padding-box}.pcard b,.pcard small,.pcard .e{position:relative}
+.pcard.t-easy{color:#4b2a63;background:radial-gradient(rgba(255,255,255,.85) 3px,transparent 3.5px) 0 0/22px 22px,linear-gradient(135deg,#ffd6ec,#fff1a8)}
+.pcard.t-pro{color:#fff;text-shadow:0 2px 0 rgba(25,10,70,.4);background:repeating-linear-gradient(135deg,rgba(255,255,255,.13) 0 8px,transparent 8px 16px),linear-gradient(135deg,#5f7de0,#8a6fd6)}
+.pcard.t-legend{color:#fff;text-shadow:0 2px 0 rgba(60,0,40,.5);box-shadow:0 7px 0 #0003,0 0 30px #ff2d8799;background:repeating-conic-gradient(from 0deg at 88% 50%,rgba(255,255,255,.26) 0 7deg,transparent 7deg 14deg),linear-gradient(120deg,#ff2d87,#ff8a00 60%,#ffd400)}
+.pcard.sel{border-color:#fff;outline:4px solid var(--ac)}
+.pcard small{opacity:.92}
+/* back / sound buttons */
+.backbtn,.corner-r{position:absolute;top:max(12px,env(safe-area-inset-top));z-index:5}.backbtn{left:max(12px,env(safe-area-inset-left))}.corner-r{right:max(12px,env(safe-area-inset-right))}
+
+/* compact play header so back+pause+dots+hearts fit */
+.top{gap:8px}.ttl{min-width:0}.dots i{width:clamp(12px,3.8vw,22px)}.hearts{font-size:18px;min-width:0}.top .ib{width:48px;height:48px;flex:none}
+/* effects */
+.flash{position:fixed;inset:0;pointer-events:none;z-index:40;opacity:0}.flash.good{animation:fl .6s;background:radial-gradient(circle,transparent 45%,#2fcf9188)}.flash.bad{animation:fl .5s;background:radial-gradient(circle,transparent 38%,#ff3b6b88)}
+@keyframes fl{0%{opacity:1}100%{opacity:0}}
+.pt{position:absolute;font-weight:1000;font-size:28px;color:#fff;text-shadow:0 3px 0 #0006,0 0 14px #ffd028;animation:ptUp 1s ease-out forwards;white-space:nowrap}
+@keyframes ptUp{0%{transform:translate(-50%,0) scale(.5);opacity:0}20%{opacity:1;transform:translate(-50%,-14px) scale(1.25)}100%{transform:translate(-50%,-90px) scale(1);opacity:0}}
+.rg{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;border:5px solid #fff;animation:ringo .65s ease-out forwards}@keyframes ringo{to{transform:scale(7);opacity:0}}
+.ep{position:absolute;font-size:22px;animation:cf 1.2s ease-out forwards}
+.mw.s.cheer{animation:cheer .7s}@keyframes cheer{0%{transform:none}30%{transform:translateY(-18px) rotate(-12deg) scale(1.18)}60%{transform:translateY(0) rotate(10deg)}100%{transform:none}}
+.mw.s.oops{animation:oops .5s}@keyframes oops{20%{transform:rotate(-14deg)}40%{transform:rotate(12deg)}60%{transform:rotate(-8deg)}80%{transform:rotate(5deg)}}
+.opt{animation:optIn .45s cubic-bezier(.2,1.5,.4,1) backwards;animation-delay:calc(var(--i,0)*70ms)}
+.lt{animation:optIn .4s cubic-bezier(.2,1.5,.4,1) backwards;animation-delay:calc(var(--i,0)*40ms)}
+@keyframes optIn{from{opacity:0;transform:translateY(24px) scale(.8)}}
+.stage{animation:stageIn .4s ease backwards}@keyframes stageIn{from{opacity:0;transform:translateY(12px) scale(.97)}}
+.screen.on.fwd{animation:inR .38s cubic-bezier(.2,.9,.3,1) both}.screen.on.back{animation:inL .38s cubic-bezier(.2,.9,.3,1) both}
+@keyframes inR{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}@keyframes inL{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:none}}
+.rays{position:absolute;width:160vmax;height:160vmax;left:50%;top:42%;margin:-80vmax 0 0 -80vmax;background:repeating-conic-gradient(rgba(255,255,255,.4) 0 9deg,transparent 9deg 18deg);-webkit-mask:radial-gradient(circle,#000 8%,transparent 55%);mask:radial-gradient(circle,#000 8%,transparent 55%);animation:spin 40s linear infinite;pointer-events:none}
+.btn.big:before{content:"";position:absolute}
+@media (prefers-reduced-motion:reduce){.tex,.rays{animation:none!important}}
+/* ======== v4: portrait column, loading, language, a11y ======== */
+body:before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 50% 18%,#3b2a7d,#140e2c)}
+@media (max-height:560px) and (min-aspect-ratio:1/1){#app{width:min(100vw,900px)}}
+.spinner{width:56px;height:56px;border-radius:50%;border:6px solid #fff8;border-top-color:var(--ac);animation:spin 1s linear infinite;margin:26px 0 10px}
+.loadtxt{font-size:18px;color:var(--txt);text-shadow:var(--txs)}
+.btn{white-space:normal;text-align:center;line-height:1.15}
+.mission{font-size:clamp(26px,7.5vw,44px);overflow-wrap:anywhere}
+.btn,.bubble,.inst,.mission,.h1,.sub,.chip,.pcard b,.pcard small,.row span,.stat,.eyebrow,.ttl b,.toast{unicode-bidi:plaintext}
+.ib{min-width:48px;min-height:48px}.chip{min-height:48px}.row{min-height:48px}.tog{height:40px}.tog:after{top:6px}
+.langgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:14px}.langgrid .chip{font-size:18px}.chip small{font-size:11px;opacity:.7}
+.toast{position:absolute;left:50%;bottom:max(16px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:30;background:#2b2159;color:#fff;border-radius:99px;padding:12px 20px;box-shadow:0 6px 0 #0004;font-size:16px;max-width:92%}
+.sndbtn.off{position:relative;opacity:.6}.sndbtn.off:after{content:"";position:absolute;width:30px;height:4px;background:#ff3b6b;border-radius:4px;transform:rotate(-40deg);box-shadow:0 0 0 2px #fff}
+.tile.right,.tile.wrong{pointer-events:none}
+#app.paused .screen *,#app.paused .bg i,#app.paused .tex{animation-play-state:paused!important}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><radialGradient id="mg" cx="35%" cy="28%"><stop offset="0" stop-color="#fff7b0"/><stop offset=".55" stop-color="#ffcb3d"/><stop offset="1" stop-color="#ff9a1f"/></radialGradient></defs></svg>
+<div id="app">
+ <div class="tex" id="tex"></div>
+ <div class="bg" id="bg"></div>
+
+ <section class="screen on" id="loading"><div class="wrap">
+  <div class="logo" id="logo2" aria-label="Color Mind 3D"></div>
+  <div class="spinner" aria-hidden="true"></div>
+  <div class="loadtxt" role="status">Loading…</div>
+ </div></section>
+
+ <section class="screen" id="title"><div class="wrap">
+  <div class="logo" id="logo" aria-label="Color Mind 3D"></div>
+  <div class="tagline">THINK • PLAY • SHINE</div>
+  <div class="mw" id="titleM" style="margin:22px 0 18px"></div>
+  <button class="btn big" id="playBtn" data-p="▶ " data-t="play">▶ PLAY</button>
+  <div class="titlebtns"><button class="ib" id="titleSet" aria-label="Settings">⚙️</button><button class="ib" id="titleLang" aria-label="Language">🌐</button><button class="ib sndbtn" aria-label="Music on or off">🎵</button></div>
+ </div></section>
+
+ <section class="screen" id="who"><button class="ib backbtn" id="whoBack" aria-label="Back">◀</button><button class="ib sndbtn corner-r" aria-label="Music on or off">🎵</button><div class="wrap">
+  <div class="mw s" id="whoM" style="margin-bottom:6px"></div>
+  <h1 class="h1" data-t="whoT">Choose your challenge!</h1><p class="sub" data-t="whoS">Pick your style!</p>
+  <div class="cards" id="whoCards"></div>
+ </div></section>
+
+ <section class="screen" id="map"><div class="mapwrap">
+  <div class="maptop"><button class="ib" id="mapHome" aria-label="Back">◀</button><div class="pill">⭐ <span id="totStars">0</span></div><div class="pill">💡 <span id="mapHints">3</span></div><button class="ib sndbtn" aria-label="Music on or off">🎵</button><button class="ib" id="mapSet" aria-label="Settings">⚙️</button></div>
+  <div class="hero"><div class="wi" id="wIcon">🍭</div><div style="flex:1"><div class="wk" id="wNum">1 / 10</div><div class="wn" id="wName">WORLD 1</div><div class="bar"><i id="wBar"></i></div></div></div>
+  <div class="lgrid" id="lgrid"></div>
+  <div class="pager"><button class="ib" id="wPrev" aria-label="Previous world">◀</button><div class="dotsw" id="wDots"></div><button class="ib" id="wNext" aria-label="Next world">▶</button></div>
+  <div class="nextpanel"><div class="mw s mood-happy" id="mapM"></div><div class="bubble" id="mapBub"></div></div>
+  <button class="btn big" id="mapPlay" style="--b:#2fcf91;margin:14px auto 0">▶ PLAY</button>
+ </div></section>
+
+ <section class="screen" id="intro"><button class="ib backbtn" id="introBack" aria-label="Back">◀</button><button class="ib sndbtn corner-r" aria-label="Music on or off">🎵</button><div class="wrap">
+  <div class="card"><div class="ribbon" id="newRib" style="display:none" data-t="newt">NEW!</div>
+   <div class="mw s introm" id="introM"></div>
+   <div class="eyebrow" id="introLv">LEVEL 1</div><div class="mission" id="introT">MEMORY FLASH</div><p class="inst" id="introI"></p>
+   <button class="btn" id="goBtn" data-t="go" data-s=" 🚀">LET'S GO! 🚀</button></div>
+ </div></section>
+
+ <section class="screen" id="play"><div class="pl">
+  <div class="top"><button class="ib" id="playBack" aria-label="Back">◀</button><button class="ib" id="pPause" aria-label="Pause"><span class="pbars"><i></i><i></i></span></button><div class="ttl"><b id="pLv">LEVEL 1</b><div class="dots" id="dots"></div></div><div class="hearts" id="hearts" aria-label="Lives"></div></div>
+  <div class="coach"><div class="mw s mood-think" id="coachM"></div><div class="bubble" id="bubble" aria-live="polite"></div></div>
+  <div class="body"><div class="stage" id="stage"></div><div class="answers" id="answers"></div></div>
+  <div class="bottom"><button class="btn sm ghost" id="hintBtn" aria-label="Hint">💡 <span data-t="hint">Hint</span> <b id="hintN">3</b></button><div class="streak" id="streak">🔥 x2</div><button class="ib sndbtn" aria-label="Music on or off">🎵</button></div>
+ </div></section>
+
+ <section class="screen" id="win"><button class="ib backbtn" id="winBack" aria-label="Back">◀</button><button class="ib sndbtn corner-r" aria-label="Music on or off">🎵</button><div class="rays"></div><div class="wrap">
+  <div class="card"><div class="mw mood-happy" id="winM" style="margin:-70px auto 4px;width:120px"></div>
+   <div class="eyebrow" id="winLv">LEVEL 1</div><div class="mission" id="winT">AWESOME!</div>
+   <div class="stars" id="winStars"><i>★</i><i>★</i><i>★</i></div>
+   <div class="stats" id="winStats"></div>
+   <p class="inst" id="allDoneTxt" data-t="allDone" style="display:none"></p>
+   <div class="btnrow"><button class="btn" id="nextBtn" data-t="next2" data-s=" ▶" style="--b:#2fcf91">NEXT ▶</button></div>
+   <div class="btnrow" style="margin-top:14px"><button class="btn sm ghost" id="replayBtn" data-p="↻ " data-t="replay">↻ Replay</button><button class="btn sm ghost" id="winMap" data-p="🗺 " data-t="levels">🗺 Levels</button></div>
+  </div>
+ </div></section>
+
+ <section class="screen" id="fail"><button class="ib backbtn" id="failBack" aria-label="Back">◀</button><button class="ib sndbtn corner-r" aria-label="Music on or off">🎵</button><div class="wrap">
+  <div class="card"><div class="mw mood-sad" id="failM" style="margin:-70px auto 4px;width:120px"></div>
+   <div class="eyebrow" id="failLv">LEVEL 1</div><div class="mission" style="color:#ff5d73" data-t="failT">SO CLOSE!</div>
+   <p class="inst" id="failTxt"></p>
+   <div class="btnrow"><button class="btn" id="retryBtn" data-p="↻ " data-t="retry" style="--b:#ff8a1f">↻ TRY AGAIN</button></div>
+   <div class="btnrow" style="margin-top:14px"><button class="btn sm ghost" id="failMap" data-p="🗺 " data-t="levels">🗺 Levels</button></div>
+  </div>
+ </div></section>
+
+ <div class="ov" id="pauseOv"><div class="sheet"><h2 data-t="paused">Paused</h2>
+  <button class="btn" id="resumeBtn" data-p="▶ " data-t="resume" style="--b:#2fcf91">▶ RESUME</button>
+  <button class="btn" id="restartBtn" data-p="↻ " data-t="restart" style="--b:#ff8a1f">↻ RESTART</button>
+  <button class="btn" id="quitBtn" data-p="🗺 " data-t="levels" style="--b:#7a6cff">🗺 LEVELS</button>
+  <button class="btn" id="pauseSet" data-p="⚙️ " data-t="settings" style="--b:#a58aff">⚙️ SETTINGS</button>
+  <div class="row"><span data-p="✨ " data-t="fxs">✨ Effects</span><button class="tog" data-tog="sfx" aria-label="Effects"></button></div>
+  <div class="row"><span data-p="🎵 " data-t="mus">🎵 Music</span><button class="tog" data-tog="music" aria-label="Music"></button></div></div></div>
+
+ <div class="ov" id="leaveOv"><div class="sheet"><h2 data-t="leaveQ">Leave level?</h2><p class="inst" style="font-size:17px" data-t="leaveT">Your progress in this level will be lost.</p><button class="btn" id="leaveStay" data-t="stay" style="--b:#2fcf91">STAY</button><button class="btn" id="leaveYes" data-t="leave" style="--b:#ff5d73">LEAVE</button></div></div>
+ <div class="ov" id="setOv"><div class="sheet"><h2 data-p="⚙️ " data-t="settings">⚙️ Settings</h2>
+  <div class="row"><span data-p="✨ " data-t="fxs">✨ Effects</span><button class="tog" data-tog="sfx" aria-label="Effects"></button></div>
+  <div class="row"><span data-p="🎵 " data-t="mus">🎵 Music</span><button class="tog" data-tog="music" aria-label="Music"></button></div>
+  <button class="btn sm" id="testSnd" data-p="🔔 " data-t="testSnd" style="--b:#7a6cff;width:100%;margin-bottom:10px">🔔 Test sound</button>
+  <div class="row"><span data-p="🌐 " data-t="lang">🌐 Language</span><button class="chip" id="langBtn" style="flex:none;min-width:130px">English</button></div>
+  <div class="row" id="plabel"><span data-t="style">Player style</span></div><div class="chips" id="chips"></div>
+  <button class="btn sm" id="resetBtn" data-p="🗑 " data-t="reset" style="--b:#ff5d73;width:100%">🗑 Reset progress</button>
+  <button class="btn" id="setClose" data-t="done" style="--b:#2fcf91">DONE</button></div></div>
+ <div class="ov" id="langOv"><div class="sheet"><h2 data-p="🌐 " data-t="chooseLang">🌐 Choose language</h2><div class="langgrid" id="langGrid"></div><button class="btn" id="langClose" data-t="done" style="--b:#2fcf91">DONE</button></div></div>
+ <button class="toast" id="sndToast" style="display:none"></button>
+</div>
+<div class="fx" id="fx"></div>
+<div class="flash" id="flash"></div>
+
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id),TEST=location.hash==='#test';
+/* ================= YouTube Playables SDK (safe wrappers; SDK is a no-op when served locally) ================= */
+const SDK=window.PlayablesSDK;
+let audioOK=SDK.isAudioEnabled();
+/* ================= helpers ================= */
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const samp=(a,n)=>shuf(a).slice(0,n),lerp=(a,b,t)=>a+(b-a)*t,Ri=(t,a,b)=>Math.round(lerp(a,b,Math.max(0,Math.min(1,t))));
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+/* ================= data ================= */
+const COL=[{n:'RED',c:'#ff4d5e'},{n:'BLUE',c:'#2f80ff'},{n:'GREEN',c:'#22c55e'},{n:'YELLOW',c:'#ffd028'},{n:'PURPLE',c:'#9b5cf6'},{n:'ORANGE',c:'#ff8a1f'},{n:'PINK',c:'#ff6fb5'},{n:'TEAL',c:'#12c2c2'}];
+const GR={
+ fruit:{n:'FRUITS',items:Array.from('🍎🍌🍇🍉🍊🍓🍍🍒🍐🍑🍋🥝')},
+ veg:{n:'VEGGIES',items:Array.from('🥕🥦🌽🥔🍆🥒🥬🍠🍄')},
+ land:{n:'LAND ANIMALS',items:Array.from('🐶🐱🐭🐹🐰🦊🐻🐼🐨🐯🦁🐮🐷🐵')},
+ sea:{n:'SEA CREATURES',items:Array.from('🐟🐠🐡🐬🐳🐙🦀🦈🦑')},
+ veh:{n:'VEHICLES',items:Array.from('🚗🚌🚑🚒🚜🚲🚀🚁🚂🚢')},
+ toy:{n:'TOYS & GAMES',items:Array.from('⚽🏀🎾🎲🎈🎁🧸🎸🥁🎨')},
+ nat:{n:'NATURE THINGS',items:Array.from('🌙⭐⚡🔥🌈🌸🌻🍀🌊')}
+};
+const NEAR={fruit:'veg',veg:'fruit',land:'sea',sea:'land',veh:'toy',toy:'veh'};
+const WORLDS=[
+ {n:'Candy Meadow',i:'🍭',c:['#ffd6ec','#ffb3d9','#fff1a8'],a:'#ff5fa8'},
+ {n:'Sunny Beach',i:'🏖',c:['#fff0a8','#ffd37a','#9fe6ff'],a:'#ff8a1f'},
+ {n:'Jungle Jam',i:'🌴',c:['#d2f7b0','#7fe09a','#fff3a0'],a:'#16a765'},
+ {n:'Ocean Splash',i:'🐠',c:['#bdeeff','#7ccbff','#b6b2ff'],a:'#1f7fff'},
+ {n:'Berry Blast',i:'🍓',c:['#ffc9d6','#ff9bb3','#e0c0ff'],a:'#e8386d'},
+ {n:'Galaxy Glow',i:'🌌',c:['#dccfff','#b39bff','#8fd6ff'],a:'#7a4dff'},
+ {n:'Rainbow Sky',i:'🌈',c:['#ffc7c7','#fff0a8','#bdf0ff'],a:'#ff5a3d'},
+ {n:'Magic Forest',i:'🍄',c:['#dcffd4','#92ebc6','#ffdcf2'],a:'#0fae85'},
+ {n:'Lava Land',i:'🌋',c:['#ffd9b5','#ffa07c','#ffe58f'],a:'#f2542d'},
+ {n:'Cloud Kingdom',i:'👑',c:['#e6f2ff','#c7b8ff','#ffd9ea'],a:'#6d5dfc'}
+];
+const PROFS={
+ easy:{id:'easy',soft:true,e:'🍀',lo:0,hi:.5,opts:3,hearts:5,qs:3,slow:1.5},
+ pro:{id:'pro',soft:false,e:'😎',lo:.15,hi:.82,opts:4,hearts:3,qs:4,slow:1.15},
+ legend:{id:'legend',soft:false,e:'👑',lo:.4,hi:1,opts:4,hearts:3,qs:4,slow:1}
+};
+let PR=PROFS.pro;
+/* ---- 3 themes: kids = LIGHT pastel, men = MID tones, legend = VIBRANT neon. 10 palettes x 10 textures each ---- */
+const PAL={
+ easy:WORLDS.map(w=>({c:w.c,a:w.a})),
+ pro:[
+  {c:['#6f8fe8','#5873cf','#8a6fd6'],a:'#ffb83d'},{c:['#4fb3b0','#3a9a9c','#4f86c6'],a:'#ff7a59'},{c:['#7fb069','#5f9a58','#c9a64c'],a:'#ff6b4a'},{c:['#a06cc4','#8452a8','#c0629a'],a:'#ffd23f'},
+  {c:['#e07a7a','#cc5f6a','#d98c5c'],a:'#2fc4b2'},{c:['#6aa0c8','#4f86b0','#7b8fd0'],a:'#ff9f43'},{c:['#86b39a','#6a9a84','#8fb06a'],a:'#e8537a'},{c:['#d08a5c','#b9704d','#c9607a'],a:'#35c5d4'},
+  {c:['#5a68c8','#4651ac','#7a55b8'],a:'#ffd23f'},{c:['#5f93a8','#487a92','#6c88c0'],a:'#ff7a59'}],
+ legend:[
+  {c:['#ff3d81','#ff7a18','#ffd400'],a:'#00c8ff'},{c:['#00c2ff','#3d5afe','#c200ff'],a:'#ffe600'},{c:['#00e676','#00b8d4','#2979ff'],a:'#ff2d87'},{c:['#ff1744','#d500f9','#651fff'],a:'#ffea00'},
+  {c:['#ffea00','#ff9100','#ff1744'],a:'#651fff'},{c:['#18ffff','#00b0ff','#7c4dff'],a:'#ff1744'},{c:['#f50057','#ff6d00','#ffd600'],a:'#00b8d4'},{c:['#76ff03','#00e676','#00b0ff'],a:'#d500f9'},
+  {c:['#ff6ec7','#7a5cff','#00d4ff'],a:'#ffee00'},{c:['#ff9100','#ff3d00','#d500f9'],a:'#00e5ff'}]
+};
+const TCOL={easy:'rgba(255,255,255,.6)',pro:'rgba(255,255,255,.15)',legend:'rgba(255,255,255,.27)'};
+const TEX=[
+ {m:'drift',bg:'radial-gradient(var(--tc) 3px,transparent 3.5px) 0 0/24px 24px'},
+ {m:'drift',bg:'linear-gradient(135deg,var(--tc) 25%,transparent 25% 50%,var(--tc) 50% 75%,transparent 75%) 0 0/30px 30px'},
+ {m:'drift',bg:'conic-gradient(var(--tc) 25%,transparent 0 50%,var(--tc) 0 75%,transparent 0) 0 0/40px 40px'},
+ {m:'drift',bg:'radial-gradient(circle at 100% 50%,transparent 20%,var(--tc) 21% 24%,transparent 25%) 0 0/30px 30px,radial-gradient(circle at 0 50%,transparent 20%,var(--tc) 21% 24%,transparent 25%) 15px 15px/30px 30px'},
+ {m:'drift',bg:'linear-gradient(var(--tc) 2px,transparent 2px) 0 0/24px 24px,linear-gradient(90deg,var(--tc) 2px,transparent 2px) 0 0/24px 24px'},
+ {m:'drift',bg:'linear-gradient(45deg,var(--tc) 25%,transparent 25%) -20px 0/40px 40px,linear-gradient(-45deg,var(--tc) 25%,transparent 25%) -20px 0/40px 40px,linear-gradient(45deg,transparent 75%,var(--tc) 75%) -20px 0/40px 40px,linear-gradient(-45deg,transparent 75%,var(--tc) 75%) -20px 0/40px 40px'},
+ {m:'drift',bg:'repeating-linear-gradient(0deg,transparent 0 16px,var(--tc) 16px 24px),repeating-linear-gradient(90deg,transparent 0 16px,var(--tc) 16px 24px)'},
+ {m:'drift',bg:'radial-gradient(var(--tc) 4px,transparent 4.5px) 0 0/30px 30px,radial-gradient(var(--tc) 4px,transparent 4.5px) 15px 15px/30px 30px'},
+ {m:'spin',bg:'repeating-conic-gradient(var(--tc) 0 6deg,transparent 6deg 12deg)'},
+ {m:'drift',bg:'linear-gradient(135deg,var(--tc) 25%,transparent 25%) -20px 0/40px 40px,linear-gradient(225deg,var(--tc) 25%,transparent 25%) -20px 0/40px 40px,linear-gradient(315deg,var(--tc) 25%,transparent 25%) 0 0/40px 40px,linear-gradient(45deg,var(--tc) 25%,transparent 25%) 0 0/40px 40px'}
+];
+let curWorld=0;
+const TYPES={
+ flash:{u:1,t:'MEMORY FLASH',i:'Watch the items pop up, then remember the order!'},
+ count:{u:2,t:'COUNT & CATCH',i:'Count carefully, then tap the right number.'},
+ odd:{u:3,t:'ODD ONE OUT',i:'Tap the one that does NOT belong.'},
+ pattern:{u:4,t:'PATTERN PARTY',i:'Find the pattern. What comes next?'},
+ stroop:{u:6,t:'COLOR CLASH',i:'Your eyes vs your brain! Read the rule carefully.'},
+ missing:{u:7,t:'VANISHING ACT',i:'One item will disappear. Spot which one!'},
+ number:{u:8,t:'NUMBER NINJA',i:'Find the secret rule, then the next number.'},
+ mix:{u:12,t:'COLOR LAB',i:'Mix colors like a wizard! 🧪'},
+ simon:{u:14,t:'LIGHT SHOW',i:'Watch the lights, then repeat them in order.'},
+ shade:{u:17,t:'SHADE SPOTTER',i:'Find the tile with a slightly different shade.'},
+ catcount:{u:19,t:'SORT & COUNT',i:'Sort the items in your head, then count the right group.'},
+ mathlogic:{u:23,t:'FRUIT MATH',i:'Every fruit hides a number. Crack the code!'},
+ reverse:{u:27,t:'BACKWARDS BRAIN',i:'Watch the sequence, then tap it in REVERSE!'},
+ mixed:{u:99,t:'MIX-UP!',i:'Surprise! Different puzzles in one round.'},
+ boss:{u:99,t:'BOSS BRAIN 👑',i:'Big challenge! All your skills in one round.'}
+};
+/* ================= localization (19 languages; English always available) ================= */
+const KEYS=['play','whoT','whoS','easy','pro','legend','yrs','dEasy','dPro','dLegend','world','next','lvl','newt','playLvl','settings','allSnd','fxs','mus','style','lang','reset','confirm','done','paused','resume','restart','levels','leaveQ','leaveT','stay','leave','go',
+ 't_flash','t_count','t_odd','t_pattern','t_stroop','t_missing','t_number','t_mix','t_simon','t_shade','t_catcount','t_mathlogic','t_reverse','t_mixed','t_boss',
+ 'i_flash','i_count','i_odd','i_pattern','i_stroop','i_missing','i_number','i_mix','i_simon','i_shade','i_catcount','i_mathlogic','i_reverse','i_mixed','i_boss',
+ 'hint','watch','first','last','numN','sec','vanish','remAll','nextNum','howMany','odd','pat','sortQ','g_fruit','g_veg','g_land','g_sea','g_veh','g_toy','g_nat','math','sMatch','sInk','sWord',
+ 'c0','c1','c2','c3','c4','c5','c6','c7','simW','yourTurn','revW','revT','shadeQ','mixQ','mixM','p0','p1','p2','p3','fire','oops','oopsW','outH','hintUsed','complete','w0','w1','w2','legendWin',
+ 'correct','streak','hearts','points','bonus','next2','replay','failT','failS','failG','retry','rotate','testSnd','enableSnd','chooseLang','allDone'];
+const KI={};KEYS.forEach((k,i)=>KI[k]=i);
+const LANGS={"en": {"n": "English", "b": 0, "r": 0, "s": ["PLAY", "Choose your challenge!", "Pick your style!", "Easy", "Pro", "Legend", "years", "Soft & friendly", "Balanced challenge", "Fast & hardcore", "WORLD", "Next up", "LEVEL", "NEW!", "PLAY LEVEL", "Settings", "All sound", "Effects", "Music", "Player style", "Language", "Reset progress", "Tap again to confirm", "DONE", "Paused", "RESUME", "RESTART", "LEVELS", "Leave level?", "Your progress in this level will be lost.", "STAY", "LEAVE", "LET'S GO!", "MEMORY FLASH", "COUNT & CATCH", "ODD ONE OUT", "PATTERN PARTY", "COLOR CLASH", "VANISHING ACT", "NUMBER NINJA", "COLOR LAB", "LIGHT SHOW", "SHADE SPOTTER", "SORT & COUNT", "FRUIT MATH", "BACKWARDS BRAIN", "MIX-UP!", "BOSS BRAIN", "Watch the items, then remember the order!", "Count carefully, then pick the number.", "Tap the one that does not belong.", "Find the pattern. What comes next?", "Your eyes vs your brain! Read the rule.", "One item will vanish. Spot it!", "Find the rule, then the next number.", "Mix colors like a wizard!", "Watch the lights, then repeat them.", "Find the tile with a different shade.", "Sort in your head, then count the group.", "Every fruit hides a number. Crack the code!", "Watch, then tap in REVERSE order!", "Surprise! Different puzzles in one round.", "Big challenge! Use all your skills.", "Hint", "Watch & remember!", "Which one was FIRST?", "Which one was LAST?", "Which one was number {n}?", "Which was SECOND TO LAST?", "Which one disappeared?", "Remember them all!", "What number comes next?", "How many {x} can you see?", "Tap the one that does NOT belong!", "What comes next in the pattern?", "How many {g} are here?", "FRUITS", "VEGGIES", "LAND ANIMALS", "SEA LIFE", "VEHICLES", "TOYS & GAMES", "NATURE THINGS", "Solve the fruit code!", "Tap the SAME color!", "Tap the INK color, not the word!", "Tap what the WORD says, ignore the ink!", "RED", "BLUE", "GREEN", "YELLOW", "PURPLE", "ORANGE", "PINK", "TEAL", "Watch the lights!", "Your turn!", "Watch the order!", "Now tap in REVERSE!", "Find the different shade!", "What color do you get?", "Which color is missing?", "Nice!", "Great!", "Awesome!", "Brilliant!", "ON FIRE!", "Oops! Try another", "Oops! Watch again", "Out of hearts!", "One wrong answer removed!", "COMPLETE", "AWESOME!", "WOW!", "SUPER STAR!", "LEGEND!", "Correct", "Best streak", "Hearts", "Points", "Bonus", "NEXT", "Replay", "SO CLOSE!", "You solved {a} of {b}. Almost there!", "Take a breath and try again!", "TRY AGAIN", "Rotate your phone to portrait", "Test sound", "Tap to enable sound", "Choose language", "You finished all 100 levels! New levels coming soon."]}, "hi": {"n": "हिन्दी", "b": 0, "r": 0, "s": ["खेलें", "अपनी चुनौती चुनें!", "अपना स्टाइल चुनें!", "आसान", "प्रो", "लीजेंड", "साल", "आसान और मज़ेदार", "संतुलित चुनौती", "तेज़ और कठिन", "दुनिया", "अगला", "लेवल", "नया!", "लेवल खेलें", "सेटिंग्स", "सारी आवाज़", "इफ़ेक्ट्स", "संगीत", "खिलाड़ी का स्टाइल", "भाषा", "प्रगति रीसेट करें", "पक्का करने के लिए फिर टैप करें", "ठीक है", "रुका हुआ", "जारी रखें", "फिर से शुरू", "लेवल्स", "लेवल छोड़ें?", "इस लेवल की प्रगति खो जाएगी।", "रुकें", "छोड़ें", "चलो शुरू करें!", "मेमोरी फ़्लैश", "गिनो और पकड़ो", "अलग कौन?", "पैटर्न पार्टी", "रंगों की टक्कर", "गायब जादू", "नंबर निंजा", "रंग लैब", "लाइट शो", "शेड खोजी", "छाँटो और गिनो", "फल गणित", "उल्टा दिमाग", "मिक्स-अप!", "बॉस ब्रेन", "चीज़ें देखो, फिर क्रम याद रखो!", "ध्यान से गिनो, फिर संख्या चुनो।", "जो बाकी से अलग है उसे टैप करो।", "पैटर्न खोजो। आगे क्या आएगा?", "आँखें बनाम दिमाग! नियम पढ़ो।", "एक चीज़ गायब होगी। पहचानो!", "नियम खोजो, फिर अगली संख्या।", "जादूगर की तरह रंग मिलाओ!", "लाइट देखो, फिर दोहराओ।", "अलग शेड वाला टाइल खोजो।", "मन में छाँटो, फिर समूह गिनो।", "हर फल में एक संख्या छिपी है। कोड तोड़ो!", "देखो, फिर उल्टे क्रम में टैप करो!", "सरप्राइज़! एक राउंड में अलग-अलग पहेलियाँ।", "बड़ी चुनौती! अपनी सारी काबिलियत लगाओ।", "संकेत", "देखो और याद रखो!", "सबसे पहले कौन सा था?", "सबसे आखिरी कौन सा था?", "नंबर {n} कौन सा था?", "आखिरी से दूसरा कौन सा था?", "कौन सा गायब हो गया?", "सबको याद रखो!", "अगली संख्या कौन सी है?", "आपको कितने {x} दिख रहे हैं?", "जो यहाँ का नहीं है उसे टैप करो!", "पैटर्न में आगे क्या आएगा?", "यहाँ कितने {g} हैं?", "फल", "सब्ज़ियाँ", "ज़मीन के जानवर", "समुद्री जीव", "गाड़ियाँ", "खिलौने और खेल", "प्रकृति की चीज़ें", "फलों का कोड हल करो!", "वही रंग टैप करो!", "स्याही का रंग टैप करो, शब्द नहीं!", "शब्द जो कहे वही टैप करो, स्याही को अनदेखा करो!", "लाल", "नीला", "हरा", "पीला", "बैंगनी", "नारंगी", "गुलाबी", "फ़िरोज़ी", "लाइट देखो!", "आपकी बारी!", "क्रम देखो!", "अब उल्टे क्रम में टैप करो!", "अलग शेड खोजो!", "कौन सा रंग बनेगा?", "कौन सा रंग गायब है?", "बढ़िया!", "शानदार!", "कमाल!", "ज़बरदस्त!", "आग लगा दी!", "ओह! दूसरा चुनो", "ओह! फिर से देखो", "दिल खत्म!", "एक गलत जवाब हटा दिया!", "पूरा", "कमाल!", "वाह!", "सुपरस्टार!", "लीजेंड!", "सही", "सबसे लंबी लकीर", "दिल", "अंक", "बोनस", "आगे", "फिर खेलें", "बस थोड़ा सा!", "आपने {b} में से {a} हल किए। बस थोड़ा और!", "गहरी साँस लो और फिर कोशिश करो!", "फिर कोशिश करें", "फ़ोन को पोर्ट्रेट में घुमाएँ", "आवाज़ टेस्ट करें", "आवाज़ चालू करने के लिए टैप करें", "भाषा चुनें", "आपने सभी 100 लेवल पूरे कर लिए! नए लेवल जल्द आ रहे हैं।"]}, "bn": {"n": "বাংলা", "b": 0, "r": 0, "s": ["খেলুন", "আপনার চ্যালেঞ্জ বেছে নিন!", "আপনার স্টাইল বেছে নিন!", "সহজ", "প্রো", "লেজেন্ড", "-", "সহজ ও মজার", "সুষম চ্যালেঞ্জ", "দ্রুত ও কঠিন", "জগৎ", "পরবর্তী", "লেভেল", "নতুন!", "লেভেল খেলুন", "সেটিংস", "সব শব্দ", "ইফেক্টস", "সঙ্গীত", "খেলার স্টাইল", "ভাষা", "অগ্রগতি রিসেট করুন", "নিশ্চিত করতে আবার ট্যাপ করুন", "ঠিক আছে", "বিরতি", "চালিয়ে যান", "আবার শুরু", "লেভেলসমূহ", "লেভেল ছাড়বেন?", "এই লেভেলের অগ্রগতি হারিয়ে যাবে।", "থাকুন", "ছাড়ুন", "চলো শুরু করি!", "মেমোরি ফ্ল্যাশ", "গুনে ধরো", "আলাদা কোনটি?", "প্যাটার্ন পার্টি", "রঙের লড়াই", "অদৃশ্য জাদু", "নম্বর নিনজা", "রঙের ল্যাব", "লাইট শো", "শেড খোঁজা", "বাছো ও গোনো", "ফলের অঙ্ক", "উল্টো মগজ", "মিক্স-আপ!", "বস ব্রেন", "জিনিসগুলো দেখো, তারপর ক্রম মনে রাখো!", "মন দিয়ে গোনো, তারপর সংখ্যাটি বেছে নাও।", "যেটি মেলে না সেটিতে ট্যাপ করো।", "প্যাটার্ন খুঁজে বের করো। এরপর কী আসবে?", "তোমার চোখ বনাম মস্তিষ্ক! নিয়মটি পড়ো।", "একটি জিনিস অদৃশ্য হবে। ধরে ফেলো!", "নিয়মটি খুঁজে পরের সংখ্যাটি বলো।", "জাদুকরের মতো রং মেশাও!", "আলো দেখো, তারপর পুনরাবৃত্তি করো।", "আলাদা শেডের টাইলটি খুঁজে বের করো।", "মনে মনে বাছো, তারপর দলটি গোনো।", "প্রতিটি ফলে একটি সংখ্যা লুকিয়ে আছে। কোড ভাঙো!", "দেখো, তারপর উল্টো ক্রমে ট্যাপ করো!", "সারপ্রাইজ! এক রাউন্ডে নানা ধাঁধা।", "বড় চ্যালেঞ্জ! তোমার সব দক্ষতা কাজে লাগাও।", "ইঙ্গিত", "দেখো আর মনে রাখো!", "প্রথমটি কোনটি ছিল?", "শেষটি কোনটি ছিল?", "{n} নম্বরটি কোনটি ছিল?", "শেষের আগেরটি কোনটি ছিল?", "কোনটি অদৃশ্য হয়ে গেল?", "সবগুলো মনে রাখো!", "পরের সংখ্যাটি কত?", "তুমি কতগুলো {x} দেখতে পাচ্ছ?", "যেটি মেলে না সেটিতে ট্যাপ করো!", "প্যাটার্নে এরপর কী আসবে?", "এখানে কতগুলো {g} আছে?", "ফল", "সবজি", "স্থলের প্রাণী", "সামুদ্রিক প্রাণী", "যানবাহন", "খেলনা ও খেলা", "প্রকৃতির জিনিস", "ফলের কোড সমাধান করো!", "একই রঙে ট্যাপ করো!", "কালির রঙে ট্যাপ করো, শব্দে নয়!", "শব্দ যা বলছে তাতে ট্যাপ করো, কালি উপেক্ষা করো!", "লাল", "নীল", "সবুজ", "হলুদ", "বেগুনি", "কমলা", "গোলাপি", "ফিরোজা", "আলো দেখো!", "তোমার পালা!", "ক্রমটি দেখো!", "এবার উল্টো ক্রমে ট্যাপ করো!", "আলাদা শেড খুঁজে বের করো!", "কোন রং পাবে?", "কোন রংটি নেই?", "দারুণ!", "চমৎকার!", "অসাধারণ!", "অনবদ্য!", "আগুন ঝরাচ্ছ!", "ইস! অন্যটি বেছে নাও", "ইস! আবার দেখো", "হৃদয় শেষ!", "একটি ভুল উত্তর সরানো হলো!", "সম্পূর্ণ", "অসাধারণ!", "ওয়াও!", "সুপারস্টার!", "লেজেন্ড!", "সঠিক", "সেরা ধারা", "হৃদয়", "পয়েন্ট", "বোনাস", "পরবর্তী", "আবার খেলুন", "একটুর জন্য!", "{b}-এর মধ্যে {a}টি সমাধান করেছ। প্রায় হয়ে গেছে!", "একটু দম নিয়ে আবার চেষ্টা করো!", "আবার চেষ্টা করুন", "-", "সাউন্ড পরীক্ষা", "শব্দ চালু করতে ট্যাপ করুন", "ভাষা বেছে নিন", "আপনি ১০০টি লেভেলই শেষ করেছেন! নতুন লেভেল শীঘ্রই আসছে।"]}, "ta": {"n": "தமிழ்", "b": 0, "r": 0, "s": ["விளையாடு", "உங்கள் சவாலைத் தேர்ந்தெடுங்கள்!", "உங்கள் ஸ்டைலைத் தேர்வு செய்யுங்கள்!", "எளிது", "ப்ரோ", "லெஜண்ட்", "வயது", "எளிமை & நட்பு", "சமநிலை சவால்", "வேகம் & கடினம்", "உலகம்", "அடுத்தது", "நிலை", "புதியது!", "நிலையை விளையாடு", "அமைப்புகள்", "அனைத்து ஒலி", "எஃபெக்ட்கள்", "இசை", "விளையாட்டு பாணி", "மொழி", "முன்னேற்றத்தை மீட்டமை", "உறுதிசெய்ய மீண்டும் தட்டுங்கள்", "சரி", "இடைநிறுத்தம்", "தொடர்", "மீண்டும் தொடங்கு", "நிலைகள்", "நிலையை விட்டு வெளியேறவா?", "இந்த நிலையில் உங்கள் முன்னேற்றம் இழக்கப்படும்.", "இரு", "வெளியேறு", "வாங்க ஆரம்பிக்கலாம்!", "நினைவு ஃப்ளாஷ்", "எண்ணிப் பிடி", "வித்தியாசமானது எது?", "பேட்டர்ன் பார்ட்டி", "நிறங்களின் மோதல்", "மறையும் மாயம்", "எண் நிஞ்சா", "நிற ஆய்வகம்", "ஒளி நிகழ்ச்சி", "சாயல் தேடல்", "பிரித்து எண்ணு", "பழக் கணிதம்", "தலைகீழ் மூளை", "கலவை!", "பாஸ் மூளை", "பொருட்களைப் பாருங்கள், பிறகு வரிசையை நினைவில் வையுங்கள்!", "கவனமாக எண்ணி, எண்ணைத் தேர்ந்தெடுங்கள்.", "பொருந்தாததைத் தட்டுங்கள்.", "பேட்டர்னைக் கண்டுபிடியுங்கள். அடுத்தது என்ன?", "உங்கள் கண்கள் vs மூளை! விதியைப் படியுங்கள்.", "ஒரு பொருள் மறையும். கண்டுபிடியுங்கள்!", "விதியைக் கண்டுபிடித்து அடுத்த எண்ணைச் சொல்லுங்கள்.", "மந்திரவாதி போல நிறங்களைக் கலக்குங்கள்!", "விளக்குகளைப் பார்த்து அதே போல் செய்யுங்கள்.", "வேறு சாயல் உள்ள டைலைக் கண்டுபிடியுங்கள்.", "மனதிற்குள் பிரித்து, குழுவை எண்ணுங்கள்.", "ஒவ்வொரு பழத்திலும் ஒரு எண் மறைந்துள்ளது. கண்டுபிடியுங்கள்!", "பாருங்கள், பிறகு தலைகீழ் வரிசையில் தட்டுங்கள்!", "ஆச்சரியம்! ஒரே சுற்றில் பல புதிர்கள்.", "பெரிய சவால்! உங்கள் திறமைகளை எல்லாம் பயன்படுத்துங்கள்.", "குறிப்பு", "பார்த்து நினைவில் வையுங்கள்!", "முதலில் வந்தது எது?", "கடைசியில் வந்தது எது?", "{n}-வது எது?", "கடைசிக்கு முந்தையது எது?", "எது மறைந்தது?", "எல்லாவற்றையும் நினைவில் வையுங்கள்!", "அடுத்த எண் என்ன?", "{x} எத்தனை தெரிகிறது?", "பொருந்தாததைத் தட்டுங்கள்!", "பேட்டர்னில் அடுத்தது என்ன?", "இங்கே எத்தனை {g} உள்ளன?", "பழங்கள்", "காய்கறிகள்", "நிலவாழ் விலங்குகள்", "கடல் உயிரினங்கள்", "வாகனங்கள்", "பொம்மைகள் & விளையாட்டுகள்", "இயற்கைப் பொருட்கள்", "பழக் குறியீட்டைத் தீர்க்கவும்!", "அதே நிறத்தைத் தட்டுங்கள்!", "மையின் நிறத்தைத் தட்டுங்கள், வார்த்தையை அல்ல!", "வார்த்தை சொல்வதைத் தட்டுங்கள், மையை புறக்கணியுங்கள்!", "சிவப்பு", "நீலம்", "பச்சை", "மஞ்சள்", "ஊதா", "ஆரஞ்சு", "இளஞ்சிவப்பு", "நீலப்பச்சை", "விளக்குகளைப் பாருங்கள்!", "உங்கள் முறை!", "வரிசையைப் பாருங்கள்!", "இப்போது தலைகீழாகத் தட்டுங்கள்!", "வேறு சாயலைக் கண்டுபிடியுங்கள்!", "என்ன நிறம் கிடைக்கும்?", "எந்த நிறம் இல்லை?", "நல்லது!", "அருமை!", "அபாரம்!", "பிரமாதம்!", "தீ பறக்குது!", "அச்சச்சோ! வேறொன்றைத் தேர்ந்தெடுங்கள்", "அச்சச்சோ! மீண்டும் பாருங்கள்", "இதயங்கள் தீர்ந்துவிட்டன!", "ஒரு தவறான விடை நீக்கப்பட்டது!", "முடிந்தது", "அபாரம்!", "வாவ்!", "சூப்பர் ஸ்டார்!", "லெஜண்ட்!", "சரி", "சிறந்த தொடர்", "இதயங்கள்", "புள்ளிகள்", "போனஸ்", "அடுத்து", "மீண்டும்", "கொஞ்சம் தான் மிஸ்!", "{b}-இல் {a} தீர்த்தீர்கள். கிட்டத்தட்ட வந்துவிட்டீர்கள்!", "ஆழ்ந்து மூச்சு விட்டு மீண்டும் முயலுங்கள்!", "மீண்டும் முயற்சி", "உங்கள் தொலைபேசியை நேராக (போர்ட்ரெய்ட்) திருப்புங்கள்", "ஒலியைச் சோதி", "ஒலியை இயக்கத் தட்டுங்கள்", "மொழியைத் தேர்ந்தெடுங்கள்", "நீங்கள் 100 நிலைகளையும் முடித்துவிட்டீர்கள்! புதிய நிலைகள் விரைவில் வருகின்றன."]}, "te": {"n": "తెలుగు", "b": 0, "r": 0, "s": ["ఆడండి", "మీ సవాలును ఎంచుకోండి!", "మీ స్టైల్ ఎంచుకోండి!", "సులభం", "ప్రో", "లెజెండ్", "సంవత్సరాలు", "సులభం & స్నేహపూర్వకం", "సమతుల్య సవాలు", "వేగం & కఠినం", "ప్రపంచం", "తరువాత", "స్థాయి", "కొత్తది!", "స్థాయి ఆడండి", "సెట్టింగ్‌లు", "అన్ని శబ్దాలు", "ఎఫెక్ట్స్", "సంగీతం", "ఆటగాడి శైలి", "భాష", "ప్రగతిని రీసెట్ చేయండి", "నిర్ధారించడానికి మళ్లీ నొక్కండి", "సరే", "పాజ్ చేయబడింది", "కొనసాగించు", "మళ్లీ ప్రారంభించు", "స్థాయిలు", "స్థాయిని వదిలేయాలా?", "ఈ స్థాయిలో మీ ప్రగతి పోతుంది.", "ఉండండి", "వదిలేయండి", "పదండి మొదలుపెడదాం!", "మెమరీ ఫ్లాష్", "లెక్కించి పట్టుకో", "వేరుగా ఉన్నది ఏది?", "ప్యాటర్న్ పార్టీ", "రంగుల పోరు", "మాయమయ్యే మాయ", "నంబర్ నింజా", "రంగుల ల్యాబ్", "లైట్ షో", "షేడ్ స్పాటర్", "వేరు చేసి లెక్కించు", "పండ్ల గణితం", "తిరగబడ్డ బుర్ర", "మిక్స్-అప్!", "బాస్ బ్రెయిన్", "వస్తువులను చూడండి, తర్వాత క్రమాన్ని గుర్తుంచుకోండి!", "జాగ్రత్తగా లెక్కించి, సంఖ్యను ఎంచుకోండి.", "చేరని దాన్ని నొక్కండి.", "ప్యాటర్న్ కనుగొనండి. తరువాత ఏమిటి?", "మీ కళ్ళు vs మీ మెదడు! నియమం చదవండి.", "ఒక వస్తువు మాయమవుతుంది. గుర్తించండి!", "నియమాన్ని కనుగొని, తరువాతి సంఖ్య చెప్పండి.", "మాంత్రికుడిలా రంగులు కలపండి!", "లైట్లను చూసి, అదే విధంగా చేయండి.", "వేరే షేడ్ ఉన్న టైల్‌ను కనుగొనండి.", "మనసులో వేరు చేసి, సమూహాన్ని లెక్కించండి.", "ప్రతి పండులో ఒక సంఖ్య దాగి ఉంది. కోడ్ ఛేదించండి!", "చూడండి, తర్వాత రివర్స్ క్రమంలో నొక్కండి!", "సర్‌ప్రైజ్! ఒకే రౌండ్‌లో రకరకాల పజిల్స్.", "పెద్ద సవాలు! మీ నైపుణ్యాలన్నీ ఉపయోగించండి.", "సూచన", "చూసి గుర్తుంచుకోండి!", "మొదట వచ్చినది ఏది?", "చివరగా వచ్చినది ఏది?", "{n}వ నంబర్ ఏది?", "చివరి నుండి రెండవది ఏది?", "ఏది మాయమైంది?", "అన్నింటినీ గుర్తుంచుకోండి!", "తరువాతి సంఖ్య ఏది?", "మీకు ఎన్ని {x} కనిపిస్తున్నాయి?", "చేరని దాన్ని నొక్కండి!", "ప్యాటర్న్‌లో తరువాత ఏమి వస్తుంది?", "ఇక్కడ ఎన్ని {g} ఉన్నాయి?", "పండ్లు", "కూరగాయలు", "భూమి జంతువులు", "సముద్ర జీవులు", "వాహనాలు", "బొమ్మలు & ఆటలు", "ప్రకృతి వస్తువులు", "పండ్ల కోడ్ పరిష్కరించండి!", "అదే రంగును నొక్కండి!", "సిరా రంగును నొక్కండి, పదాన్ని కాదు!", "పదం చెప్పేదాన్ని నొక్కండి, సిరాను పట్టించుకోవద్దు!", "ఎరుపు", "నీలం", "ఆకుపచ్చ", "పసుపు", "ఊదా", "నారింజ", "గులాబీ", "నీలి ఆకుపచ్చ", "లైట్లను చూడండి!", "మీ వంతు!", "క్రమాన్ని చూడండి!", "ఇప్పుడు రివర్స్‌లో నొక్కండి!", "వేరే షేడ్‌ను కనుగొనండి!", "ఏ రంగు వస్తుంది?", "ఏ రంగు లేదు?", "బాగుంది!", "గ్రేట్!", "అద్భుతం!", "అదిరింది!", "నిప్పులు చెరిగారు!", "అయ్యో! మరొకటి ఎంచుకోండి", "అయ్యో! మళ్లీ చూడండి", "హృదయాలు అయిపోయాయి!", "ఒక తప్పు సమాధానం తొలగించబడింది!", "పూర్తి", "అద్భుతం!", "వావ్!", "సూపర్ స్టార్!", "లెజెండ్!", "సరైనవి", "ఉత్తమ వరుస", "హృదయాలు", "పాయింట్లు", "బోనస్", "తరువాత", "మళ్లీ ఆడు", "కొద్దిలో పోయింది!", "{b}లో {a} పరిష్కరించారు. దాదాపు వచ్చేసారు!", "గట్టిగా శ్వాస తీసుకుని మళ్లీ ప్రయత్నించండి!", "మళ్లీ ప్రయత్నించు", "మీ ఫోన్‌ను పోర్ట్రెయిట్‌లోకి తిప్పండి", "శబ్దం పరీక్షించు", "శబ్దం ఆన్ చేయడానికి నొక్కండి", "భాషను ఎంచుకోండి", "మీరు మొత్తం 100 స్థాయిలను పూర్తి చేశారు! కొత్త స్థాయిలు త్వరలో వస్తాయి."]}, "kn": {"n": "ಕನ್ನಡ", "b": 0, "r": 0, "s": ["ಆಡಿ", "ನಿಮ್ಮ ಸವಾಲನ್ನು ಆರಿಸಿ!", "ನಿಮ್ಮ ಶೈಲಿಯನ್ನು ಆರಿಸಿ!", "ಸುಲಭ", "ಪ್ರೊ", "ಲೆಜೆಂಡ್", "ವರ್ಷ", "ಸುಲಭ ಮತ್ತು ಸ್ನೇಹಪರ", "ಸಮತೋಲಿತ ಸವಾಲು", "ವೇಗ ಮತ್ತು ಕಠಿಣ", "ಪ್ರಪಂಚ", "ಮುಂದಿನದು", "ಹಂತ", "ಹೊಸದು!", "ಹಂತ ಆಡಿ", "ಸೆಟ್ಟಿಂಗ್‌ಗಳು", "ಎಲ್ಲಾ ಶಬ್ದ", "ಎಫೆಕ್ಟ್‌ಗಳು", "ಸಂಗೀತ", "ಆಟಗಾರನ ಶೈಲಿ", "ಭಾಷೆ", "ಪ್ರಗತಿಯನ್ನು ರೀಸೆಟ್ ಮಾಡಿ", "ಖಚಿತಪಡಿಸಲು ಮತ್ತೆ ಟ್ಯಾಪ್ ಮಾಡಿ", "ಸರಿ", "ವಿರಾಮ", "ಮುಂದುವರಿಸಿ", "ಮತ್ತೆ ಆರಂಭಿಸಿ", "ಹಂತಗಳು", "ಹಂತವನ್ನು ಬಿಡುವಿರಾ?", "ಈ ಹಂತದಲ್ಲಿನ ನಿಮ್ಮ ಪ್ರಗತಿ ಕಳೆದುಹೋಗುತ್ತದೆ.", "ಇರಿ", "ಬಿಡಿ", "ಬನ್ನಿ ಶುರು ಮಾಡೋಣ!", "ಮೆಮೊರಿ ಫ್ಲ್ಯಾಶ್", "ಎಣಿಸಿ ಹಿಡಿ", "ಬೇರೆಯದು ಯಾವುದು?", "ಪ್ಯಾಟರ್ನ್ ಪಾರ್ಟಿ", "ಬಣ್ಣಗಳ ಸಂಘರ್ಷ", "ಮಾಯವಾಗುವ ಮ್ಯಾಜಿಕ್", "ನಂಬರ್ ನಿಂಜಾ", "ಬಣ್ಣದ ಲ್ಯಾಬ್", "ಲೈಟ್ ಶೋ", "ಶೇಡ್ ಸ್ಪಾಟರ್", "ವಿಂಗಡಿಸಿ ಎಣಿಸಿ", "ಹಣ್ಣಿನ ಗಣಿತ", "ಉಲ್ಟಾ ಮೆದುಳು", "ಮಿಕ್ಸ್-ಅಪ್!", "ಬಾಸ್ ಬ್ರೈನ್", "ವಸ್ತುಗಳನ್ನು ನೋಡಿ, ನಂತರ ಕ್ರಮವನ್ನು ನೆನಪಿಡಿ!", "ಜಾಗರೂಕತೆಯಿಂದ ಎಣಿಸಿ, ಸಂಖ್ಯೆಯನ್ನು ಆರಿಸಿ.", "ಸೇರದಿರುವುದನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ.", "ಪ್ಯಾಟರ್ನ್ ಕಂಡುಹಿಡಿಯಿರಿ. ಮುಂದೆ ಏನು?", "ನಿಮ್ಮ ಕಣ್ಣು vs ಮೆದುಳು! ನಿಯಮ ಓದಿ.", "ಒಂದು ವಸ್ತು ಮಾಯವಾಗುತ್ತದೆ. ಗುರುತಿಸಿ!", "ನಿಯಮ ಕಂಡುಹಿಡಿದು, ಮುಂದಿನ ಸಂಖ್ಯೆ ಹೇಳಿ.", "ಮಾಂತ್ರಿಕನಂತೆ ಬಣ್ಣಗಳನ್ನು ಬೆರೆಸಿ!", "ದೀಪಗಳನ್ನು ನೋಡಿ, ಅದೇ ರೀತಿ ಮಾಡಿ.", "ಬೇರೆ ಶೇಡ್ ಇರುವ ಟೈಲ್ ಹುಡುಕಿ.", "ಮನಸ್ಸಿನಲ್ಲೇ ವಿಂಗಡಿಸಿ, ಗುಂಪನ್ನು ಎಣಿಸಿ.", "ಪ್ರತಿ ಹಣ್ಣಿನಲ್ಲೂ ಒಂದು ಸಂಖ್ಯೆ ಅಡಗಿದೆ. ಕೋಡ್ ಬಿಡಿಸಿ!", "ನೋಡಿ, ನಂತರ ಹಿಮ್ಮುಖ ಕ್ರಮದಲ್ಲಿ ಟ್ಯಾಪ್ ಮಾಡಿ!", "ಸರ್ಪ್ರೈಸ್! ಒಂದೇ ಸುತ್ತಿನಲ್ಲಿ ಬೇರೆ ಬೇರೆ ಒಗಟುಗಳು.", "ದೊಡ್ಡ ಸವಾಲು! ನಿಮ್ಮ ಎಲ್ಲಾ ಕೌಶಲ್ಯ ಬಳಸಿ.", "ಸುಳಿವು", "ನೋಡಿ ನೆನಪಿಡಿ!", "ಮೊದಲು ಬಂದದ್ದು ಯಾವುದು?", "ಕೊನೆಯಲ್ಲಿ ಬಂದದ್ದು ಯಾವುದು?", "{n}ನೇ ಯಾವುದು?", "ಕೊನೆಯಿಂದ ಎರಡನೆಯದು ಯಾವುದು?", "ಯಾವುದು ಮಾಯವಾಯಿತು?", "ಎಲ್ಲವನ್ನೂ ನೆನಪಿಡಿ!", "ಮುಂದಿನ ಸಂಖ್ಯೆ ಯಾವುದು?", "ನಿಮಗೆ ಎಷ್ಟು {x} ಕಾಣುತ್ತಿವೆ?", "ಸೇರದಿರುವುದನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ!", "ಪ್ಯಾಟರ್ನ್‌ನಲ್ಲಿ ಮುಂದೆ ಏನು ಬರುತ್ತದೆ?", "ಇಲ್ಲಿ ಎಷ್ಟು {g} ಇವೆ?", "ಹಣ್ಣುಗಳು", "ತರಕಾರಿಗಳು", "ಭೂಮಿಯ ಪ್ರಾಣಿಗಳು", "ಸಮುದ್ರ ಜೀವಿಗಳು", "ವಾಹನಗಳು", "ಆಟಿಕೆಗಳು ಮತ್ತು ಆಟಗಳು", "ಪ್ರಕೃತಿಯ ವಸ್ತುಗಳು", "ಹಣ್ಣಿನ ಕೋಡ್ ಬಿಡಿಸಿ!", "ಅದೇ ಬಣ್ಣವನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ!", "ಶಾಯಿಯ ಬಣ್ಣವನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ, ಪದವನ್ನಲ್ಲ!", "ಪದ ಹೇಳುವುದನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ, ಶಾಯಿಯನ್ನು ಬಿಡಿ!", "ಕೆಂಪು", "ನೀಲಿ", "ಹಸಿರು", "ಹಳದಿ", "ನೇರಳೆ", "ಕಿತ್ತಳೆ", "ಗುಲಾಬಿ", "ಟೀಲ್", "ದೀಪಗಳನ್ನು ನೋಡಿ!", "ನಿಮ್ಮ ಸರದಿ!", "ಕ್ರಮವನ್ನು ನೋಡಿ!", "ಈಗ ಹಿಮ್ಮುಖವಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ!", "ಬೇರೆ ಶೇಡ್ ಹುಡುಕಿ!", "ಯಾವ ಬಣ್ಣ ಸಿಗುತ್ತದೆ?", "ಯಾವ ಬಣ್ಣ ಇಲ್ಲ?", "ಚೆನ್ನಾಗಿದೆ!", "ಸೂಪರ್!", "ಅದ್ಭುತ!", "ಅದ್ಭುತ ಸಾಧನೆ!", "ಬೆಂಕಿ!", "ಅಯ್ಯೋ! ಇನ್ನೊಂದನ್ನು ಆರಿಸಿ", "ಅಯ್ಯೋ! ಮತ್ತೆ ನೋಡಿ", "ಹೃದಯಗಳು ಮುಗಿದವು!", "ಒಂದು ತಪ್ಪು ಉತ್ತರವನ್ನು ತೆಗೆದಿದೆ!", "ಪೂರ್ಣ", "ಅದ್ಭುತ!", "ವಾವ್!", "ಸೂಪರ್ ಸ್ಟಾರ್!", "ಲೆಜೆಂಡ್!", "ಸರಿ", "ಉತ್ತಮ ಸರಣಿ", "ಹೃದಯಗಳು", "ಅಂಕಗಳು", "ಬೋನಸ್", "ಮುಂದೆ", "ಮತ್ತೆ ಆಡಿ", "ಸ್ವಲ್ಪದರಲ್ಲಿ ತಪ್ಪಿತು!", "{b}ರಲ್ಲಿ {a} ಬಿಡಿಸಿದ್ದೀರಿ. ಬಹುತೇಕ ಬಂದಿದ್ದೀರಿ!", "ಆಳವಾಗಿ ಉಸಿರಾಡಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ!", "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ", "ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ಪೋರ್ಟ್ರೇಟ್‌ಗೆ ತಿರುಗಿಸಿ", "ಧ್ವನಿ ಪರೀಕ್ಷಿಸಿ", "ಧ್ವನಿ ಆನ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ", "ಭಾಷೆ ಆರಿಸಿ", "ನೀವು ಎಲ್ಲಾ 100 ಹಂತಗಳನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ! ಹೊಸ ಹಂತಗಳು ಶೀಘ್ರದಲ್ಲೇ ಬರಲಿವೆ."]}, "ml": {"n": "മലയാളം", "b": 0, "r": 0, "s": ["കളിക്കുക", "നിങ്ങളുടെ വെല്ലുവിളി തിരഞ്ഞെടുക്കൂ!", "നിങ്ങളുടെ ശൈലി തിരഞ്ഞെടുക്കൂ!", "എളുപ്പം", "പ്രോ", "ലെജൻഡ്", "വയസ്സ്", "എളുപ്പവും സൗഹൃദവും", "സമതുലിത വെല്ലുവിളി", "വേഗവും കഠിനവും", "ലോകം", "അടുത്തത്", "ലെവൽ", "പുതിയത്!", "ലെവൽ കളിക്കുക", "ക്രമീകരണങ്ങൾ", "എല്ലാ ശബ്ദവും", "ഇഫക്റ്റുകൾ", "സംഗീതം", "കളിക്കാരന്റെ ശൈലി", "ഭാഷ", "പുരോഗതി റീസെറ്റ് ചെയ്യുക", "ഉറപ്പാക്കാൻ വീണ്ടും ടാപ്പ് ചെയ്യുക", "ശരി", "താൽക്കാലികമായി നിർത്തി", "തുടരുക", "വീണ്ടും തുടങ്ങുക", "ലെവലുകൾ", "ലെവൽ വിടണോ?", "ഈ ലെവലിലെ നിങ്ങളുടെ പുരോഗതി നഷ്ടമാകും.", "നിൽക്കുക", "വിടുക", "നമുക്ക് തുടങ്ങാം!", "മെമ്മറി ഫ്ലാഷ്", "എണ്ണിപ്പിടിക്കുക", "വ്യത്യസ്തമായത് ഏത്?", "പാറ്റേൺ പാർട്ടി", "നിറങ്ങളുടെ ഏറ്റുമുട്ടൽ", "മാഞ്ഞുപോകുന്ന മായ", "നമ്പർ നിൻജ", "നിറങ്ങളുടെ ലാബ്", "ലൈറ്റ് ഷോ", "ഷേഡ് സ്പോട്ടർ", "തരംതിരിച്ച് എണ്ണുക", "പഴ ഗണിതം", "തലതിരിഞ്ഞ തലച്ചോർ", "മിക്സ്-അപ്പ്!", "ബോസ് ബ്രെയിൻ", "വസ്തുക്കൾ കാണുക, പിന്നെ ക്രമം ഓർക്കുക!", "ശ്രദ്ധയോടെ എണ്ണി സംഖ്യ തിരഞ്ഞെടുക്കുക.", "ചേരാത്തതിൽ ടാപ്പ് ചെയ്യുക.", "പാറ്റേൺ കണ്ടെത്തുക. അടുത്തത് എന്ത്?", "നിങ്ങളുടെ കണ്ണ് vs തലച്ചോർ! നിയമം വായിക്കുക.", "ഒരു വസ്തു മാഞ്ഞുപോകും. കണ്ടെത്തൂ!", "നിയമം കണ്ടെത്തി അടുത്ത സംഖ്യ പറയുക.", "മാന്ത്രികനെപ്പോലെ നിറങ്ങൾ കലർത്തൂ!", "ലൈറ്റുകൾ കണ്ട് അതുപോലെ ആവർത്തിക്കുക.", "വ്യത്യസ്ത ഷേഡുള്ള ടൈൽ കണ്ടെത്തുക.", "മനസ്സിൽ തരംതിരിച്ച് കൂട്ടം എണ്ണുക.", "ഓരോ പഴത്തിലും ഒരു സംഖ്യ ഒളിഞ്ഞിരിപ്പുണ്ട്. കോഡ് പൊളിക്കൂ!", "കാണുക, പിന്നെ വിപരീത ക്രമത്തിൽ ടാപ്പ് ചെയ്യുക!", "സർപ്രൈസ്! ഒരു റൗണ്ടിൽ പലതരം പസിലുകൾ.", "വലിയ വെല്ലുവിളി! നിങ്ങളുടെ എല്ലാ കഴിവും ഉപയോഗിക്കൂ.", "സൂചന", "കണ്ട് ഓർക്കുക!", "ആദ്യം വന്നത് ഏതാണ്?", "അവസാനം വന്നത് ഏതാണ്?", "{n}-ാമത്തേത് ഏതാണ്?", "അവസാനത്തിന് തൊട്ടുമുമ്പത്തേത് ഏതാണ്?", "ഏതാണ് മാഞ്ഞുപോയത്?", "എല്ലാം ഓർത്തുവെക്കൂ!", "അടുത്ത സംഖ്യ ഏതാണ്?", "നിങ്ങൾക്ക് എത്ര {x} കാണാം?", "ചേരാത്തതിൽ ടാപ്പ് ചെയ്യൂ!", "പാറ്റേണിൽ അടുത്തത് എന്താണ്?", "ഇവിടെ എത്ര {g} ഉണ്ട്?", "പഴങ്ങൾ", "പച്ചക്കറികൾ", "കരജീവികൾ", "കടൽജീവികൾ", "വാഹനങ്ങൾ", "കളിപ്പാട്ടങ്ങളും കളികളും", "പ്രകൃതി വസ്തുക്കൾ", "പഴ കോഡ് പരിഹരിക്കൂ!", "അതേ നിറത്തിൽ ടാപ്പ് ചെയ്യൂ!", "മഷിയുടെ നിറത്തിൽ ടാപ്പ് ചെയ്യൂ, വാക്കിലല്ല!", "വാക്ക് പറയുന്നതിൽ ടാപ്പ് ചെയ്യൂ, മഷി അവഗണിക്കൂ!", "ചുവപ്പ്", "നീല", "പച്ച", "മഞ്ഞ", "വയലറ്റ്", "ഓറഞ്ച്", "പിങ്ക്", "നീലപ്പച്ച", "ലൈറ്റുകൾ ശ്രദ്ധിക്കൂ!", "നിങ്ങളുടെ ഊഴം!", "ക്രമം ശ്രദ്ധിക്കൂ!", "ഇനി വിപരീതമായി ടാപ്പ് ചെയ്യൂ!", "വ്യത്യസ്ത ഷേഡ് കണ്ടെത്തൂ!", "ഏത് നിറം കിട്ടും?", "ഏത് നിറമാണ് ഇല്ലാത്തത്?", "കൊള്ളാം!", "ഗംഭീരം!", "അടിപൊളി!", "ഉജ്ജ്വലം!", "തീപാറുന്നു!", "അയ്യോ! മറ്റൊന്ന് നോക്കൂ", "അയ്യോ! വീണ്ടും കാണൂ", "ഹൃദയങ്ങൾ തീർന്നു!", "ഒരു തെറ്റായ ഉത്തരം നീക്കി!", "പൂർത്തിയായി", "അടിപൊളി!", "വൗ!", "സൂപ്പർ സ്റ്റാർ!", "ലെജൻഡ്!", "ശരി", "മികച്ച തുടർച്ച", "ഹൃദയങ്ങൾ", "പോയിന്റുകൾ", "ബോണസ്", "അടുത്തത്", "വീണ്ടും കളിക്കൂ", "ഒരു തലനാരിഴയ്ക്ക്!", "{b}-ൽ {a} പരിഹരിച്ചു. ഏതാണ്ട് എത്തി!", "ദീർഘമായി ശ്വസിച്ച് വീണ്ടും ശ്രമിക്കൂ!", "വീണ്ടും ശ്രമിക്കൂ", "ഫോൺ പോർട്രെയ്റ്റിലേക്ക് തിരിക്കൂ", "ശബ്ദം പരീക്ഷിക്കൂ", "ശബ്ദം ഓണാക്കാൻ ടാപ്പ് ചെയ്യൂ", "ഭാഷ തിരഞ്ഞെടുക്കൂ", "നിങ്ങൾ 100 ലെവലുകളും പൂർത്തിയാക്കി! പുതിയ ലെവലുകൾ ഉടൻ വരുന്നു."]}, "mr": {"n": "मराठी", "b": 0, "r": 0, "s": ["खेळा", "तुमचे आव्हान निवडा!", "तुमची शैली निवडा!", "सोपे", "प्रो", "लीजेंड", "-", "सोपे आणि मजेदार", "समतोल आव्हान", "वेगवान आणि कठीण", "जग", "पुढे", "लेव्हल", "नवीन!", "लेव्हल खेळा", "सेटिंग्ज", "सर्व आवाज", "इफेक्ट्स", "संगीत", "खेळाडूची शैली", "भाषा", "प्रगती रीसेट करा", "खात्री करण्यासाठी पुन्हा टॅप करा", "ठीक आहे", "थांबवले", "पुढे चालू ठेवा", "पुन्हा सुरू करा", "लेव्हल्स", "लेव्हल सोडायची?", "या लेव्हलमधील तुमची प्रगती गमावली जाईल.", "थांबा", "सोडा", "चला सुरू करूया!", "मेमरी फ्लॅश", "मोजा आणि पकडा", "वेगळे कोणते?", "पॅटर्न पार्टी", "रंगांची टक्कर", "गायब जादू", "नंबर निंजा", "रंग लॅब", "लाइट शो", "शेड शोधक", "वेगळे करा आणि मोजा", "फळ गणित", "उलटा मेंदू", "मिक्स-अप!", "बॉस ब्रेन", "वस्तू पाहा, मग क्रम लक्षात ठेवा!", "काळजीपूर्वक मोजा, मग संख्या निवडा.", "जे बसत नाही त्यावर टॅप करा.", "पॅटर्न शोधा. पुढे काय येईल?", "तुमचे डोळे विरुद्ध मेंदू! नियम वाचा.", "एक वस्तू गायब होईल. ओळखा!", "नियम शोधा, मग पुढची संख्या.", "जादूगारासारखे रंग मिसळा!", "दिवे पाहा, मग पुन्हा करा.", "वेगळ्या शेडची टाइल शोधा.", "मनात वेगळे करा, मग गट मोजा.", "प्रत्येक फळात एक संख्या लपली आहे. कोड सोडवा!", "पाहा, मग उलट क्रमाने टॅप करा!", "सरप्राइज! एका फेरीत वेगवेगळी कोडी.", "मोठे आव्हान! तुमची सर्व कौशल्ये वापरा.", "सूचना", "पाहा आणि लक्षात ठेवा!", "पहिले कोणते होते?", "शेवटचे कोणते होते?", "क्रमांक {n} कोणता होता?", "शेवटून दुसरे कोणते होते?", "कोणते गायब झाले?", "सगळे लक्षात ठेवा!", "पुढची संख्या कोणती?", "तुम्हाला किती {x} दिसतात?", "जे बसत नाही त्यावर टॅप करा!", "पॅटर्नमध्ये पुढे काय येईल?", "इथे किती {g} आहेत?", "फळे", "भाज्या", "जमिनीवरचे प्राणी", "सागरी जीव", "वाहने", "खेळणी आणि खेळ", "निसर्गातील वस्तू", "फळांचा कोड सोडवा!", "तोच रंग टॅप करा!", "शाईचा रंग टॅप करा, शब्द नाही!", "शब्द जे सांगतो ते टॅप करा, शाईकडे दुर्लक्ष करा!", "लाल", "निळा", "हिरवा", "पिवळा", "जांभळा", "केशरी", "गुलाबी", "पिरोजी", "दिवे पाहा!", "तुमची पाळी!", "क्रम पाहा!", "आता उलट क्रमाने टॅप करा!", "वेगळी शेड शोधा!", "कोणता रंग मिळेल?", "कोणता रंग गायब आहे?", "छान!", "उत्तम!", "जबरदस्त!", "शानदार!", "आग लावली!", "अरेरे! दुसरे निवडा", "अरेरे! पुन्हा पाहा", "हृदये संपली!", "एक चुकीचे उत्तर काढले!", "पूर्ण", "जबरदस्त!", "वाह!", "सुपरस्टार!", "लीजेंड!", "बरोबर", "सर्वोत्तम मालिका", "हृदये", "गुण", "बोनस", "पुढे", "पुन्हा खेळा", "थोडक्यात हुकले!", "तुम्ही {b} पैकी {a} सोडवली. जवळजवळ झाले!", "दीर्घ श्वास घ्या आणि पुन्हा प्रयत्न करा!", "पुन्हा प्रयत्न करा", "-", "आवाज तपासा", "आवाज सुरू करण्यासाठी टॅप करा", "भाषा निवडा", "तुम्ही सर्व 100 लेव्हल पूर्ण केल्या! नवीन लेव्हल लवकरच येत आहेत."]}, "gu": {"n": "ગુજરાતી", "b": 0, "r": 0, "s": ["રમો", "તમારો પડકાર પસંદ કરો!", "તમારી શૈલી પસંદ કરો!", "સરળ", "પ્રો", "લેજન્ડ", "-", "સરળ અને મજેદાર", "સંતુલિત પડકાર", "ઝડપી અને અઘરું", "દુનિયા", "હવે પછી", "લેવલ", "નવું!", "લેવલ રમો", "સેટિંગ્સ", "બધો અવાજ", "ઇફેક્ટ્સ", "સંગીત", "ખેલાડીની શૈલી", "ભાષા", "પ્રગતિ રીસેટ કરો", "ખાતરી માટે ફરી ટૅપ કરો", "ઠીક છે", "થોભાવ્યું", "ચાલુ રાખો", "ફરી શરૂ કરો", "લેવલ્સ", "લેવલ છોડી દેવું છે?", "આ લેવલની તમારી પ્રગતિ ગુમાવાશે.", "રહો", "છોડો", "ચાલો શરૂ કરીએ!", "મેમરી ફ્લેશ", "ગણો અને પકડો", "અલગ કોણ?", "પેટર્ન પાર્ટી", "રંગોની ટક્કર", "ગાયબ જાદુ", "નંબર નિન્જા", "રંગ લેબ", "લાઇટ શો", "શેડ શોધક", "અલગ કરો અને ગણો", "ફળ ગણિત", "ઊંધું મગજ", "મિક્સ-અપ!", "બોસ બ્રેઇન", "વસ્તુઓ જુઓ, પછી ક્રમ યાદ રાખો!", "ધ્યાનથી ગણો, પછી સંખ્યા પસંદ કરો.", "જે બંધબેસતું નથી તેને ટૅપ કરો.", "પેટર્ન શોધો. આગળ શું આવશે?", "તમારી આંખો વિરુદ્ધ મગજ! નિયમ વાંચો.", "એક વસ્તુ ગાયબ થશે. ઓળખો!", "નિયમ શોધો, પછી આગળની સંખ્યા.", "જાદુગરની જેમ રંગો ભેળવો!", "લાઇટ જુઓ, પછી ફરીથી કરો.", "અલગ શેડવાળી ટાઇલ શોધો.", "મનમાં અલગ કરો, પછી જૂથ ગણો.", "દરેક ફળમાં એક સંખ્યા છુપાયેલી છે. કોડ ઉકેલો!", "જુઓ, પછી ઊંધા ક્રમમાં ટૅપ કરો!", "સરપ્રાઇઝ! એક રાઉન્ડમાં જુદા જુદા કોયડા.", "મોટો પડકાર! તમારી બધી કુશળતા વાપરો.", "સંકેત", "જુઓ અને યાદ રાખો!", "પહેલું કયું હતું?", "છેલ્લું કયું હતું?", "નંબર {n} કયો હતો?", "છેલ્લેથી બીજું કયું હતું?", "કયું ગાયબ થઈ ગયું?", "બધું યાદ રાખો!", "આગળની સંખ્યા કઈ?", "તમને કેટલા {x} દેખાય છે?", "જે બંધબેસતું નથી તેને ટૅપ કરો!", "પેટર્નમાં આગળ શું આવશે?", "અહીં કેટલા {g} છે?", "ફળો", "શાકભાજી", "જમીનના પ્રાણીઓ", "દરિયાઈ જીવો", "વાહનો", "રમકડાં અને રમતો", "કુદરતની વસ્તુઓ", "ફળનો કોડ ઉકેલો!", "એ જ રંગ ટૅપ કરો!", "શાહીનો રંગ ટૅપ કરો, શબ્દ નહીં!", "શબ્દ જે કહે તે ટૅપ કરો, શાહી અવગણો!", "લાલ", "વાદળી", "લીલો", "પીળો", "જાંબલી", "નારંગી", "ગુલાબી", "પીરોજી", "લાઇટ જુઓ!", "તમારો વારો!", "ક્રમ જુઓ!", "હવે ઊંધા ક્રમમાં ટૅપ કરો!", "અલગ શેડ શોધો!", "કયો રંગ મળશે?", "કયો રંગ ગાયબ છે?", "સરસ!", "બહુ સરસ!", "જબરદસ્ત!", "શાનદાર!", "આગ લગાવી!", "અરે! બીજું પસંદ કરો", "અરે! ફરી જુઓ", "હૃદય પૂરા!", "એક ખોટો જવાબ દૂર કર્યો!", "પૂર્ણ", "જબરદસ્ત!", "વાહ!", "સુપરસ્ટાર!", "લેજન્ડ!", "સાચા", "શ્રેષ્ઠ શ્રેણી", "હૃદય", "પોઇન્ટ", "બોનસ", "આગળ", "ફરી રમો", "જરાકમાં રહી ગયું!", "તમે {b} માંથી {a} ઉકેલ્યા. લગભગ થઈ ગયું!", "ઊંડો શ્વાસ લો અને ફરી પ્રયત્ન કરો!", "ફરી પ્રયત્ન કરો", "-", "અવાજ ચકાસો", "અવાજ ચાલુ કરવા ટૅપ કરો", "ભાષા પસંદ કરો", "તમે બધા 100 લેવલ પૂરા કર્યા! નવા લેવલ જલ્દી આવી રહ્યા છે."]}, "pa": {"n": "ਪੰਜਾਬੀ", "b": 0, "r": 0, "s": ["ਖੇਡੋ", "ਆਪਣੀ ਚੁਣੌਤੀ ਚੁਣੋ!", "ਆਪਣਾ ਸਟਾਈਲ ਚੁਣੋ!", "ਆਸਾਨ", "ਪ੍ਰੋ", "ਲੈਜੰਡ", "-", "ਆਸਾਨ ਤੇ ਮਜ਼ੇਦਾਰ", "ਸੰਤੁਲਿਤ ਚੁਣੌਤੀ", "ਤੇਜ਼ ਤੇ ਔਖਾ", "ਦੁਨੀਆ", "ਅਗਲਾ", "ਲੈਵਲ", "ਨਵਾਂ!", "ਲੈਵਲ ਖੇਡੋ", "ਸੈਟਿੰਗਾਂ", "ਸਾਰੀ ਆਵਾਜ਼", "ਇਫੈਕਟਸ", "ਸੰਗੀਤ", "ਖਿਡਾਰੀ ਦਾ ਸਟਾਈਲ", "ਭਾਸ਼ਾ", "ਤਰੱਕੀ ਰੀਸੈੱਟ ਕਰੋ", "ਪੱਕਾ ਕਰਨ ਲਈ ਦੁਬਾਰਾ ਟੈਪ ਕਰੋ", "ਠੀਕ ਹੈ", "ਰੁਕਿਆ ਹੋਇਆ", "ਜਾਰੀ ਰੱਖੋ", "ਮੁੜ ਸ਼ੁਰੂ ਕਰੋ", "ਲੈਵਲ", "ਲੈਵਲ ਛੱਡਣਾ ਹੈ?", "ਇਸ ਲੈਵਲ ਦੀ ਤੁਹਾਡੀ ਤਰੱਕੀ ਖਤਮ ਹੋ ਜਾਵੇਗੀ।", "ਰੁਕੋ", "ਛੱਡੋ", "ਚੱਲੋ ਸ਼ੁਰੂ ਕਰੀਏ!", "ਮੈਮਰੀ ਫਲੈਸ਼", "ਗਿਣੋ ਤੇ ਫੜੋ", "ਵੱਖਰਾ ਕਿਹੜਾ?", "ਪੈਟਰਨ ਪਾਰਟੀ", "ਰੰਗਾਂ ਦੀ ਟੱਕਰ", "ਗਾਇਬ ਜਾਦੂ", "ਨੰਬਰ ਨਿੰਜਾ", "ਰੰਗ ਲੈਬ", "ਲਾਈਟ ਸ਼ੋਅ", "ਸ਼ੇਡ ਖੋਜੀ", "ਛਾਂਟੋ ਤੇ ਗਿਣੋ", "ਫਲ ਹਿਸਾਬ", "ਉਲਟਾ ਦਿਮਾਗ", "ਮਿਕਸ-ਅੱਪ!", "ਬੌਸ ਬ੍ਰੇਨ", "ਚੀਜ਼ਾਂ ਦੇਖੋ, ਫਿਰ ਕ੍ਰਮ ਯਾਦ ਰੱਖੋ!", "ਧਿਆਨ ਨਾਲ ਗਿਣੋ, ਫਿਰ ਗਿਣਤੀ ਚੁਣੋ।", "ਜੋ ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ ਉਸ ਨੂੰ ਟੈਪ ਕਰੋ।", "ਪੈਟਰਨ ਲੱਭੋ। ਅੱਗੇ ਕੀ ਆਵੇਗਾ?", "ਤੁਹਾਡੀਆਂ ਅੱਖਾਂ ਬਨਾਮ ਦਿਮਾਗ! ਨਿਯਮ ਪੜ੍ਹੋ।", "ਇੱਕ ਚੀਜ਼ ਗਾਇਬ ਹੋਵੇਗੀ। ਪਛਾਣੋ!", "ਨਿਯਮ ਲੱਭੋ, ਫਿਰ ਅਗਲੀ ਗਿਣਤੀ।", "ਜਾਦੂਗਰ ਵਾਂਗ ਰੰਗ ਮਿਲਾਓ!", "ਲਾਈਟਾਂ ਦੇਖੋ, ਫਿਰ ਦੁਹਰਾਓ।", "ਵੱਖਰੇ ਸ਼ੇਡ ਵਾਲੀ ਟਾਈਲ ਲੱਭੋ।", "ਮਨ ਵਿੱਚ ਛਾਂਟੋ, ਫਿਰ ਸਮੂਹ ਗਿਣੋ।", "ਹਰ ਫਲ ਵਿੱਚ ਇੱਕ ਗਿਣਤੀ ਲੁਕੀ ਹੈ। ਕੋਡ ਹੱਲ ਕਰੋ!", "ਦੇਖੋ, ਫਿਰ ਉਲਟੇ ਕ੍ਰਮ ਵਿੱਚ ਟੈਪ ਕਰੋ!", "ਸਰਪ੍ਰਾਈਜ਼! ਇੱਕ ਰਾਊਂਡ ਵਿੱਚ ਵੱਖ-ਵੱਖ ਬੁਝਾਰਤਾਂ।", "ਵੱਡੀ ਚੁਣੌਤੀ! ਆਪਣੇ ਸਾਰੇ ਹੁਨਰ ਵਰਤੋ।", "ਸੰਕੇਤ", "ਦੇਖੋ ਤੇ ਯਾਦ ਰੱਖੋ!", "ਪਹਿਲਾ ਕਿਹੜਾ ਸੀ?", "ਆਖਰੀ ਕਿਹੜਾ ਸੀ?", "ਨੰਬਰ {n} ਕਿਹੜਾ ਸੀ?", "ਆਖਰੀ ਤੋਂ ਦੂਜਾ ਕਿਹੜਾ ਸੀ?", "ਕਿਹੜਾ ਗਾਇਬ ਹੋਇਆ?", "ਸਭ ਯਾਦ ਰੱਖੋ!", "ਅਗਲੀ ਗਿਣਤੀ ਕਿਹੜੀ ਹੈ?", "ਤੁਹਾਨੂੰ ਕਿੰਨੇ {x} ਦਿਸ ਰਹੇ ਹਨ?", "ਜੋ ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ ਉਸ ਨੂੰ ਟੈਪ ਕਰੋ!", "ਪੈਟਰਨ ਵਿੱਚ ਅੱਗੇ ਕੀ ਆਵੇਗਾ?", "ਇੱਥੇ ਕਿੰਨੇ {g} ਹਨ?", "ਫਲ", "ਸਬਜ਼ੀਆਂ", "ਜ਼ਮੀਨੀ ਜਾਨਵਰ", "ਸਮੁੰਦਰੀ ਜੀਵ", "ਵਾਹਨ", "ਖਿਡੌਣੇ ਤੇ ਖੇਡਾਂ", "ਕੁਦਰਤੀ ਚੀਜ਼ਾਂ", "ਫਲਾਂ ਦਾ ਕੋਡ ਹੱਲ ਕਰੋ!", "ਉਹੀ ਰੰਗ ਟੈਪ ਕਰੋ!", "ਸਿਆਹੀ ਦਾ ਰੰਗ ਟੈਪ ਕਰੋ, ਸ਼ਬਦ ਨਹੀਂ!", "ਸ਼ਬਦ ਜੋ ਕਹੇ ਉਹ ਟੈਪ ਕਰੋ, ਸਿਆਹੀ ਨੂੰ ਅਣਡਿੱਠ ਕਰੋ!", "ਲਾਲ", "ਨੀਲਾ", "ਹਰਾ", "ਪੀਲਾ", "ਜਾਮਣੀ", "ਸੰਤਰੀ", "ਗੁਲਾਬੀ", "ਫ਼ਿਰੋਜ਼ੀ", "ਲਾਈਟਾਂ ਦੇਖੋ!", "ਤੁਹਾਡੀ ਵਾਰੀ!", "ਕ੍ਰਮ ਦੇਖੋ!", "ਹੁਣ ਉਲਟੇ ਕ੍ਰਮ ਵਿੱਚ ਟੈਪ ਕਰੋ!", "ਵੱਖਰਾ ਸ਼ੇਡ ਲੱਭੋ!", "ਕਿਹੜਾ ਰੰਗ ਮਿਲੇਗਾ?", "ਕਿਹੜਾ ਰੰਗ ਗਾਇਬ ਹੈ?", "ਸ਼ਾਬਾਸ਼!", "ਬਹੁਤ ਵਧੀਆ!", "ਕਮਾਲ!", "ਸ਼ਾਨਦਾਰ!", "ਅੱਗ ਲਾ ਦਿੱਤੀ!", "ਓਹ! ਹੋਰ ਚੁਣੋ", "ਓਹ! ਦੁਬਾਰਾ ਦੇਖੋ", "ਦਿਲ ਖਤਮ!", "ਇੱਕ ਗਲਤ ਜਵਾਬ ਹਟਾ ਦਿੱਤਾ!", "ਪੂਰਾ", "ਕਮਾਲ!", "ਵਾਹ!", "ਸੁਪਰਸਟਾਰ!", "ਲੈਜੰਡ!", "ਸਹੀ", "ਸਭ ਤੋਂ ਲੰਮੀ ਲੜੀ", "ਦਿਲ", "ਅੰਕ", "ਬੋਨਸ", "ਅੱਗੇ", "ਦੁਬਾਰਾ ਖੇਡੋ", "ਬਸ ਥੋੜ੍ਹਾ ਜਿਹਾ ਰਹਿ ਗਿਆ!", "ਤੁਸੀਂ {b} ਵਿੱਚੋਂ {a} ਹੱਲ ਕੀਤੇ। ਲਗਭਗ ਹੋ ਗਿਆ!", "ਡੂੰਘਾ ਸਾਹ ਲਓ ਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ!", "ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ", "-", "ਆਵਾਜ਼ ਟੈਸਟ ਕਰੋ", "ਆਵਾਜ਼ ਚਾਲੂ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ", "ਭਾਸ਼ਾ ਚੁਣੋ", "ਤੁਸੀਂ ਸਾਰੇ 100 ਲੈਵਲ ਪੂਰੇ ਕਰ ਲਏ! ਨਵੇਂ ਲੈਵਲ ਜਲਦੀ ਆ ਰਹੇ ਹਨ।"]}, "or": {"n": "ଓଡ଼ିଆ", "b": 0, "r": 0, "s": ["ଖେଳନ୍ତୁ", "ଆପଣଙ୍କ ଚ୍ୟାଲେଞ୍ଜ ବାଛନ୍ତୁ!", "ଆପଣଙ୍କ ଷ୍ଟାଇଲ ବାଛନ୍ତୁ!", "ସହଜ", "ପ୍ରୋ", "ଲେଜେଣ୍ଡ", "-", "ସହଜ ଓ ମଜାଦାର", "ସନ୍ତୁଳିତ ଚ୍ୟାଲେଞ୍ଜ", "ଦ୍ରୁତ ଓ କଠିନ", "ଦୁନିଆ", "ପରବର୍ତ୍ତୀ", "ଲେଭଲ", "ନୂଆ!", "ଲେଭଲ ଖେଳନ୍ତୁ", "ସେଟିଂସ", "ସବୁ ଶବ୍ଦ", "ଇଫେକ୍ଟସ", "ସଙ୍ଗୀତ", "ଖେଳାଳିଙ୍କ ଷ୍ଟାଇଲ", "ଭାଷା", "ପ୍ରଗତି ରିସେଟ କରନ୍ତୁ", "ନିଶ୍ଚିତ କରିବାକୁ ପୁଣି ଟ୍ୟାପ କରନ୍ତୁ", "ଠିକ୍ ଅଛି", "ବିରାମ", "ଜାରି ରଖନ୍ତୁ", "ପୁଣି ଆରମ୍ଭ କରନ୍ତୁ", "ଲେଭଲଗୁଡ଼ିକ", "ଲେଭଲ ଛାଡ଼ିବେ?", "ଏହି ଲେଭଲରେ ଆପଣଙ୍କ ପ୍ରଗତି ହଜିଯିବ।", "ରୁହନ୍ତୁ", "ଛାଡ଼ନ୍ତୁ", "ଚାଲନ୍ତୁ ଆରମ୍ଭ କରିବା!", "ମେମୋରୀ ଫ୍ଲାସ୍", "ଗଣି ଧରନ୍ତୁ", "ଅଲଗା କେଉଁଟା?", "ପ୍ୟାଟର୍ନ ପାର୍ଟି", "ରଙ୍ଗର ଟକ୍କର", "ଲୁଚିଯିବା ଯାଦୁ", "ନମ୍ବର ନିଞ୍ଜା", "ରଙ୍ଗ ଲ୍ୟାବ", "ଲାଇଟ ସୋ", "ସେଡ ଖୋଜା", "ବାଛି ଗଣନ୍ତୁ", "ଫଳ ଗଣିତ", "ଓଲଟା ମଗଜ", "ମିକ୍ସ-ଅପ୍!", "ବସ ବ୍ରେନ", "ଜିନିଷଗୁଡ଼ିକୁ ଦେଖନ୍ତୁ, ତା'ପରେ କ୍ରମ ମନେ ରଖନ୍ତୁ!", "ଧ୍ୟାନରେ ଗଣନ୍ତୁ, ତା'ପରେ ସଂଖ୍ୟା ବାଛନ୍ତୁ।", "ଯାହା ମେଳ ଖାଉନି ତାକୁ ଟ୍ୟାପ କରନ୍ତୁ।", "ପ୍ୟାଟର୍ନ ଖୋଜନ୍ତୁ। ଆଗକୁ କ'ଣ ଆସିବ?", "ଆପଣଙ୍କ ଆଖି ବନାମ ମସ୍ତିଷ୍କ! ନିୟମ ପଢ଼ନ୍ତୁ।", "ଗୋଟିଏ ଜିନିଷ ଲୁଚିଯିବ। ଚିହ୍ନଟ କରନ୍ତୁ!", "ନିୟମ ଖୋଜନ୍ତୁ, ତା'ପରେ ପରବର୍ତ୍ତୀ ସଂଖ୍ୟା।", "ଯାଦୁଗରଙ୍କ ପରି ରଙ୍ଗ ମିଶାନ୍ତୁ!", "ଲାଇଟ ଦେଖନ୍ତୁ, ତା'ପରେ ଦୋହରାନ୍ତୁ।", "ଅଲଗା ସେଡ୍ ଥିବା ଟାଇଲ ଖୋଜନ୍ତୁ।", "ମନେ ମନେ ବାଛନ୍ତୁ, ତା'ପରେ ଗୋଷ୍ଠୀ ଗଣନ୍ତୁ।", "ପ୍ରତ୍ୟେକ ଫଳରେ ଗୋଟିଏ ସଂଖ୍ୟା ଲୁଚିଛି। କୋଡ୍ ଭାଙ୍ଗନ୍ତୁ!", "ଦେଖନ୍ତୁ, ତା'ପରେ ଓଲଟା କ୍ରମରେ ଟ୍ୟାପ କରନ୍ତୁ!", "ସରପ୍ରାଇଜ୍! ଗୋଟିଏ ରାଉଣ୍ଡରେ ଭିନ୍ନ ଭିନ୍ନ ପଜଲ୍।", "ବଡ଼ ଚ୍ୟାଲେଞ୍ଜ! ଆପଣଙ୍କ ସମସ୍ତ ଦକ୍ଷତା ବ୍ୟବହାର କରନ୍ତୁ।", "ସୂଚନା", "ଦେଖନ୍ତୁ ଓ ମନେ ରଖନ୍ତୁ!", "ପ୍ରଥମଟି କେଉଁଟା ଥିଲା?", "ଶେଷଟି କେଉଁଟା ଥିଲା?", "{n} ନମ୍ବର କେଉଁଟା ଥିଲା?", "ଶେଷରୁ ଦ୍ୱିତୀୟଟି କେଉଁଟା ଥିଲା?", "କେଉଁଟି ଲୁଚିଗଲା?", "ସବୁ ମନେ ରଖନ୍ତୁ!", "ପରବର୍ତ୍ତୀ ସଂଖ୍ୟା କେତେ?", "ଆପଣ କେତୋଟି {x} ଦେଖୁଛନ୍ତି?", "ଯାହା ମେଳ ଖାଉନି ତାକୁ ଟ୍ୟାପ କରନ୍ତୁ!", "ପ୍ୟାଟର୍ନରେ ଆଗକୁ କ'ଣ ଆସିବ?", "ଏଠାରେ କେତୋଟି {g} ଅଛି?", "ଫଳ", "ପରିବା", "ସ୍ଥଳଚର ଜୀବ", "ସାମୁଦ୍ରିକ ଜୀବ", "ଯାନବାହନ", "ଖେଳନା ଓ ଖେଳ", "ପ୍ରକୃତିର ଜିନିଷ", "ଫଳ କୋଡ୍ ସମାଧାନ କରନ୍ତୁ!", "ସମାନ ରଙ୍ଗକୁ ଟ୍ୟାପ କରନ୍ତୁ!", "କାଳିର ରଙ୍ଗକୁ ଟ୍ୟାପ କରନ୍ତୁ, ଶବ୍ଦକୁ ନୁହେଁ!", "ଶବ୍ଦ ଯାହା କହୁଛି ତାକୁ ଟ୍ୟାପ କରନ୍ତୁ, କାଳିକୁ ଅଣଦେଖା କରନ୍ତୁ!", "ନାଲି", "ନୀଳ", "ସବୁଜ", "ହଳଦିଆ", "ବାଇଗଣି", "କମଳା", "ଗୋଲାପୀ", "ଫିରୋଜି", "ଲାଇଟ ଦେଖନ୍ତୁ!", "ଆପଣଙ୍କ ପାଳି!", "କ୍ରମ ଦେଖନ୍ତୁ!", "ବର୍ତ୍ତମାନ ଓଲଟା କ୍ରମରେ ଟ୍ୟାପ କରନ୍ତୁ!", "ଅଲଗା ସେଡ୍ ଖୋଜନ୍ତୁ!", "କେଉଁ ରଙ୍ଗ ମିଳିବ?", "କେଉଁ ରଙ୍ଗଟି ନାହିଁ?", "ବଢ଼ିଆ!", "ଅତି ସୁନ୍ଦର!", "ଚମତ୍କାର!", "ଉଜ୍ଜ୍ୱଳ!", "ନିଆଁ ଲଗାଇଲ!", "ଆହା! ଆଉ ଗୋଟିଏ ବାଛନ୍ତୁ", "ଆହା! ପୁଣି ଦେଖନ୍ତୁ", "ହୃଦୟ ସରିଗଲା!", "ଗୋଟିଏ ଭୁଲ ଉତ୍ତର ହଟାଗଲା!", "ସମ୍ପୂର୍ଣ୍ଣ", "ଚମତ୍କାର!", "ୱାଓ!", "ସୁପରଷ୍ଟାର!", "ଲେଜେଣ୍ଡ!", "ଠିକ୍", "ସର୍ବୋତ୍ତମ ଧାରା", "ହୃଦୟ", "ପଏଣ୍ଟ", "ବୋନସ୍", "ପରବର୍ତ୍ତୀ", "ପୁଣି ଖେଳନ୍ତୁ", "ଟିକିଏ ପାଇଁ ରହିଗଲା!", "ଆପଣ {b} ମଧ୍ୟରୁ {a} ସମାଧାନ କଲେ। ପ୍ରାୟ ହୋଇଗଲା!", "ଗଭୀର ଶ୍ୱାସ ନିଅନ୍ତୁ ଓ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ!", "ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ", "-", "ଶବ୍ଦ ପରୀକ୍ଷା", "ଶବ୍ଦ ଚାଲୁ କରିବାକୁ ଟ୍ୟାପ କରନ୍ତୁ", "ଭାଷା ବାଛନ୍ତୁ", "ଆପଣ ସମସ୍ତ 100 ଲେଭଲ ସମାପ୍ତ କଲେ! ନୂଆ ଲେଭଲ ଶୀଘ୍ର ଆସୁଛି।"]}, "as": {"n": "অসমীয়া", "b": 0, "r": 0, "s": ["খেলক", "আপোনাৰ প্ৰত্যাহ্বান বাছক!", "আপোনাৰ শৈলী বাছক!", "সহজ", "প্ৰো", "লেজেণ্ড", "-", "সহজ আৰু আমোদজনক", "সুষম প্ৰত্যাহ্বান", "দ্ৰুত আৰু কঠিন", "জগত", "পৰৱৰ্তী", "লেভেল", "নতুন!", "লেভেল খেলক", "ছেটিংছ", "সকলো শব্দ", "ইফেক্টছ", "সংগীত", "খেলুৱৈৰ শৈলী", "ভাষা", "অগ্ৰগতি ৰিছেট কৰক", "নিশ্চিত কৰিবলৈ আকৌ টেপ কৰক", "ঠিক আছে", "বিৰতি", "অব্যাহত ৰাখক", "পুনৰ আৰম্ভ কৰক", "লেভেলসমূহ", "লেভেল এৰিব নেকি?", "এই লেভেলত আপোনাৰ অগ্ৰগতি হেৰাই যাব।", "থাকক", "এৰক", "আহক আৰম্ভ কৰোঁ!", "মেম'ৰী ফ্লেশ্ব", "গণি ধৰক", "বেলেগ কোনটো?", "পেটাৰ্ণ পাৰ্টী", "ৰঙৰ সংঘাত", "অদৃশ্য যাদু", "নম্বৰ নিনজা", "ৰং লেব", "লাইট শ্ব'", "শ্বেড বিচাৰক", "বাছি গণক", "ফলৰ অংক", "ওলোটা মগজু", "মিক্স-আপ!", "বছ ব্ৰেইন", "বস্তুবোৰ চাওক, তাৰ পিছত ক্ৰম মনত ৰাখক!", "মনোযোগেৰে গণক, তাৰ পিছত সংখ্যাটো বাছক।", "যিটো নিমিলে তাক টেপ কৰক।", "পেটাৰ্ণ বিচাৰক। পাছত কি আহিব?", "আপোনাৰ চকু বনাম মগজু! নিয়ম পঢ়ক।", "এটা বস্তু অদৃশ্য হ'ব। চিনাক্ত কৰক!", "নিয়ম বিচাৰক, তাৰ পিছত পৰৱৰ্তী সংখ্যা।", "যাদুকৰৰ দৰে ৰং মিলাওক!", "লাইটবোৰ চাওক, তাৰ পিছত পুনৰাবৃত্তি কৰক।", "বেলেগ শ্বেডৰ টাইল বিচাৰক।", "মনতে বাছক, তাৰ পিছত দলটো গণক।", "প্ৰতিটো ফলত এটা সংখ্যা লুকাই আছে। ক'ড ভাঙক!", "চাওক, তাৰ পিছত ওলোটা ক্ৰমত টেপ কৰক!", "চাৰপ্ৰাইজ! এটা ৰাউণ্ডত বিভিন্ন ধাঁধা।", "ডাঙৰ প্ৰত্যাহ্বান! আপোনাৰ সকলো দক্ষতা ব্যৱহাৰ কৰক।", "ইংগিত", "চাওক আৰু মনত ৰাখক!", "প্ৰথমটো কোনটো আছিল?", "শেষটো কোনটো আছিল?", "{n} নম্বৰটো কোনটো আছিল?", "শেষৰ আগটো কোনটো আছিল?", "কোনটো অদৃশ্য হ'ল?", "সকলো মনত ৰাখক!", "পৰৱৰ্তী সংখ্যা কি?", "আপুনি কিমানটা {x} দেখা পাইছে?", "যিটো নিমিলে তাক টেপ কৰক!", "পেটাৰ্ণত পাছত কি আহিব?", "ইয়াত কিমানটা {g} আছে?", "ফল", "পাচলি", "স্থলচৰ প্ৰাণী", "সামুদ্ৰিক প্ৰাণী", "যানবাহন", "খেলনা আৰু খেল", "প্ৰকৃতিৰ বস্তু", "ফলৰ ক'ড সমাধান কৰক!", "একেটা ৰঙত টেপ কৰক!", "চিয়াহীৰ ৰঙত টেপ কৰক, শব্দত নহয়!", "শব্দই যি কয় তাত টেপ কৰক, চিয়াহী আওকাণ কৰক!", "ৰঙা", "নীলা", "সেউজীয়া", "হালধীয়া", "বেঙুনীয়া", "কমলা", "গুলপীয়া", "ফিৰোজা", "লাইটবোৰ চাওক!", "আপোনাৰ পাল!", "ক্ৰমটো চাওক!", "এতিয়া ওলোটা ক্ৰমত টেপ কৰক!", "বেলেগ শ্বেড বিচাৰক!", "কি ৰং পাব?", "কোনটো ৰং নাই?", "ভাল!", "অতি ভাল!", "অসাধাৰণ!", "উজ্জ্বল!", "জুইত জ্বলি আছে!", "ইচ্! আন এটা বাছক", "ইচ্! আকৌ চাওক", "হৃদয় শেষ!", "এটা ভুল উত্তৰ আঁতৰোৱা হ'ল!", "সম্পূৰ্ণ", "অসাধাৰণ!", "ৱাও!", "ছুপাৰষ্টাৰ!", "লেজেণ্ড!", "শুদ্ধ", "শ্ৰেষ্ঠ ধাৰা", "হৃদয়", "পইণ্ট", "বোনাছ", "পৰৱৰ্তী", "আকৌ খেলক", "অলপৰ বাবে বাদ পৰিল!", "আপুনি {b}টাৰ ভিতৰত {a}টা সমাধান কৰিলে। প্ৰায় হ'ল!", "গভীৰ উশাহ লওক আৰু আকৌ চেষ্টা কৰক!", "আকৌ চেষ্টা কৰক", "-", "শব্দ পৰীক্ষা কৰক", "শব্দ চালু কৰিবলৈ টেপ কৰক", "ভাষা বাছক", "আপুনি সকলো 100টা লেভেল সম্পূৰ্ণ কৰিলে! নতুন লেভেল সোনকালে আহিব।"]}, "ur": {"n": "اردو", "b": 0, "r": 1, "s": ["کھیلیں", "اپنا چیلنج منتخب کریں!", "اپنا انداز منتخب کریں!", "آسان", "پرو", "لیجنڈ", "-", "آسان اور مزے دار", "متوازن چیلنج", "تیز اور مشکل", "دنیا", "اگلا", "لیول", "نیا!", "لیول کھیلیں", "ترتیبات", "تمام آواز", "ایفیکٹس", "موسیقی", "کھلاڑی کا انداز", "زبان", "پیش رفت ری سیٹ کریں", "تصدیق کے لیے دوبارہ ٹیپ کریں", "ٹھیک ہے", "روکا گیا", "جاری رکھیں", "دوبارہ شروع کریں", "لیولز", "لیول چھوڑیں؟", "اس لیول کی آپ کی پیش رفت ختم ہو جائے گی۔", "رکیں", "چھوڑیں", "چلیں شروع کریں!", "میموری فلیش", "گنیں اور پکڑیں", "الگ کون سا؟", "پیٹرن پارٹی", "رنگوں کا ٹکراؤ", "غائب جادو", "نمبر نِنجا", "رنگ لیب", "لائٹ شو", "شیڈ تلاش", "چھانٹیں اور گنیں", "پھل حساب", "الٹا دماغ", "مکس اپ!", "باس برین", "چیزیں دیکھیں، پھر ترتیب یاد رکھیں!", "غور سے گنیں، پھر عدد چنیں۔", "جو میل نہیں کھاتا اسے ٹیپ کریں۔", "پیٹرن تلاش کریں۔ آگے کیا آئے گا؟", "آپ کی آنکھیں بمقابلہ دماغ! اصول پڑھیں۔", "ایک چیز غائب ہو جائے گی۔ پہچانیں!", "اصول تلاش کریں، پھر اگلا عدد بتائیں۔", "جادوگر کی طرح رنگ ملائیں!", "روشنیاں دیکھیں، پھر دہرائیں۔", "مختلف شیڈ والی ٹائل تلاش کریں۔", "ذہن میں چھانٹیں، پھر گروپ گنیں۔", "ہر پھل میں ایک عدد چھپا ہے۔ کوڈ توڑیں!", "دیکھیں، پھر الٹی ترتیب میں ٹیپ کریں!", "سرپرائز! ایک راؤنڈ میں مختلف پہیلیاں۔", "بڑا چیلنج! اپنی تمام مہارتیں استعمال کریں۔", "اشارہ", "دیکھیں اور یاد رکھیں!", "پہلا کون سا تھا؟", "آخری کون سا تھا؟", "نمبر {n} کون سا تھا؟", "آخر سے دوسرا کون سا تھا؟", "کون سا غائب ہو گیا؟", "سب یاد رکھیں!", "اگلا عدد کون سا ہے؟", "آپ کو کتنے {x} نظر آ رہے ہیں؟", "جو میل نہیں کھاتا اسے ٹیپ کریں!", "پیٹرن میں آگے کیا آئے گا؟", "یہاں کتنے {g} ہیں؟", "پھل", "سبزیاں", "زمینی جانور", "سمندری جاندار", "گاڑیاں", "کھلونے اور کھیل", "قدرتی چیزیں", "پھلوں کا کوڈ حل کریں!", "وہی رنگ ٹیپ کریں!", "سیاہی کا رنگ ٹیپ کریں، لفظ کو نہیں!", "لفظ جو کہے وہ ٹیپ کریں، سیاہی کو نظر انداز کریں!", "سرخ", "نیلا", "سبز", "پیلا", "جامنی", "نارنجی", "گلابی", "فیروزی", "روشنیاں دیکھیں!", "آپ کی باری!", "ترتیب دیکھیں!", "اب الٹی ترتیب میں ٹیپ کریں!", "مختلف شیڈ تلاش کریں!", "کون سا رنگ بنے گا؟", "کون سا رنگ غائب ہے؟", "زبردست!", "بہت خوب!", "کمال!", "شاندار!", "آگ لگا دی!", "اوہ! دوسرا چنیں", "اوہ! دوبارہ دیکھیں", "دل ختم!", "ایک غلط جواب ہٹا دیا گیا!", "مکمل", "کمال!", "واہ!", "سپر اسٹار!", "لیجنڈ!", "درست", "بہترین سلسلہ", "دل", "پوائنٹس", "بونس", "آگے", "دوبارہ کھیلیں", "بس ذرا سی کسر رہ گئی!", "آپ نے {b} میں سے {a} حل کیے۔ تقریباً ہو گیا!", "گہری سانس لیں اور دوبارہ کوشش کریں!", "دوبارہ کوشش کریں", "-", "آواز ٹیسٹ کریں", "آواز چالو کرنے کے لیے ٹیپ کریں", "زبان منتخب کریں", "آپ نے تمام 100 لیولز مکمل کر لیے! نئے لیولز جلد آ رہے ہیں۔"]}, "ne": {"n": "नेपाली", "b": 0, "r": 0, "s": ["खेल्नुहोस्", "आफ्नो चुनौती छान्नुहोस्!", "आफ्नो शैली छान्नुहोस्!", "सजिलो", "प्रो", "लेजेन्ड", "-", "सजिलो र रमाइलो", "सन्तुलित चुनौती", "छिटो र कठिन", "संसार", "अर्को", "लेभल", "नयाँ!", "लेभल खेल्नुहोस्", "सेटिङहरू", "सबै आवाज", "इफेक्टहरू", "सङ्गीत", "खेलाडीको शैली", "भाषा", "प्रगति रिसेट गर्नुहोस्", "पक्का गर्न फेरि ट्याप गर्नुहोस्", "ठीक छ", "रोकिएको", "जारी राख्नुहोस्", "फेरि सुरु गर्नुहोस्", "लेभलहरू", "लेभल छोड्ने?", "यो लेभलको तपाईंको प्रगति गुम्नेछ।", "बस्नुहोस्", "छोड्नुहोस्", "सुरु गरौं!", "मेमोरी फ्ल्यास", "गन्नुहोस् र समात्नुहोस्", "फरक कुन?", "प्याटर्न पार्टी", "रङको टक्कर", "हराउने जादु", "नम्बर निन्जा", "रङ ल्याब", "लाइट सो", "सेड खोजी", "छुट्याएर गन्नुहोस्", "फलफूल गणित", "उल्टो दिमाग", "मिक्स-अप!", "बस ब्रेन", "वस्तुहरू हेर्नुहोस्, अनि क्रम सम्झनुहोस्!", "ध्यानले गन्नुहोस्, अनि सङ्ख्या छान्नुहोस्।", "नमिल्ने कुरामा ट्याप गर्नुहोस्।", "प्याटर्न खोज्नुहोस्। अब के आउँछ?", "तपाईंको आँखा बनाम दिमाग! नियम पढ्नुहोस्।", "एउटा वस्तु हराउनेछ। पहिचान गर्नुहोस्!", "नियम खोज्नुहोस्, अनि अर्को सङ्ख्या।", "जादूगरझैं रङ मिसाउनुहोस्!", "बत्तीहरू हेर्नुहोस्, अनि दोहोर्याउनुहोस्।", "फरक सेड भएको टाइल खोज्नुहोस्।", "मनमनै छुट्याउनुहोस्, अनि समूह गन्नुहोस्।", "हरेक फलमा एउटा सङ्ख्या लुकेको छ। कोड फुटाउनुहोस्!", "हेर्नुहोस्, अनि उल्टो क्रममा ट्याप गर्नुहोस्!", "सरप्राइज! एक राउन्डमा विभिन्न पजल।", "ठूलो चुनौती! आफ्ना सबै सीप प्रयोग गर्नुहोस्।", "सङ्केत", "हेर्नुहोस् र सम्झनुहोस्!", "पहिलो कुन थियो?", "अन्तिम कुन थियो?", "नम्बर {n} कुन थियो?", "अन्तिमभन्दा अघिल्लो कुन थियो?", "कुन हरायो?", "सबै सम्झनुहोस्!", "अर्को सङ्ख्या कुन हो?", "तपाईंले कतिवटा {x} देख्नुभयो?", "नमिल्ने कुरामा ट्याप गर्नुहोस्!", "प्याटर्नमा अब के आउँछ?", "यहाँ कतिवटा {g} छन्?", "फलफूल", "तरकारी", "स्थलचर जनावर", "समुद्री जीव", "सवारी साधन", "खेलौना र खेल", "प्रकृतिका वस्तु", "फलको कोड हल गर्नुहोस्!", "उही रङमा ट्याप गर्नुहोस्!", "मसीको रङमा ट्याप गर्नुहोस्, शब्दमा होइन!", "शब्दले भनेकोमा ट्याप गर्नुहोस्, मसीलाई बेवास्ता गर्नुहोस्!", "रातो", "निलो", "हरियो", "पहेंलो", "बैजनी", "सुन्तला रङ", "गुलाबी", "फिरोजा", "बत्तीहरू हेर्नुहोस्!", "तपाईंको पालो!", "क्रम हेर्नुहोस्!", "अब उल्टो क्रममा ट्याप गर्नुहोस्!", "फरक सेड खोज्नुहोस्!", "कुन रङ बन्छ?", "कुन रङ हराएको छ?", "राम्रो!", "उत्कृष्ट!", "अद्भुत!", "शानदार!", "आगो लगायो!", "अचम्म! अर्को छान्नुहोस्", "अचम्म! फेरि हेर्नुहोस्", "मुटु सकियो!", "एउटा गलत उत्तर हटाइयो!", "पूर्ण", "अद्भुत!", "वाउ!", "सुपरस्टार!", "लेजेन्ड!", "सही", "उत्कृष्ट शृङ्खला", "मुटु", "अङ्क", "बोनस", "अर्को", "फेरि खेल्नुहोस्", "अलिकति चुक्यो!", "तपाईंले {b} मध्ये {a} हल गर्नुभयो। लगभग भयो!", "गहिरो सास लिनुहोस् र फेरि प्रयास गर्नुहोस्!", "फेरि प्रयास गर्नुहोस्", "-", "आवाज परीक्षण गर्नुहोस्", "आवाज खोल्न ट्याप गर्नुहोस्", "भाषा छान्नुहोस्", "तपाईंले सबै 100 लेभल पूरा गर्नुभयो! नयाँ लेभल छिट्टै आउँदैछन्।"]}, "sa": {"n": "संस्कृतम्", "b": 1, "r": 0, "s": ["क्रीडतु", "स्वस्य आह्वानं चिनुत!", "स्वस्य शैलीं चिनुत!", "सुलभम्", "प्रो", "लेजेण्ड्", "-", "सरलं मित्रवत् च", "सन्तुलितम् आह्वानम्", "द्रुतं कठिनं च", "जगत्", "अग्रिमम्", "स्तरः", "नवम्!", "स्तरं क्रीडतु", "विन्यासाः", "सर्वः ध्वनिः", "प्रभावाः", "सङ्गीतम्", "क्रीडकस्य शैली", "भाषा", "प्रगतिं पुनः स्थापयतु", "पुष्ट्यर्थं पुनः स्पृशतु", "साधु", "विरामः", "अनुवर्तताम्", "पुनः आरभताम्", "स्तराः", "स्तरं त्यजेत्?", "अस्मिन् स्तरे भवतः प्रगतिः नश्येत्।", "तिष्ठतु", "त्यजतु", "आरभामहै!", "स्मृति-स्फुरणम्", "गणयतु गृह्णातु च", "भिन्नं किम्?", "आकृति-उत्सवः", "वर्णसङ्घर्षः", "अदृश्य-मायाः", "सङ्ख्या-योद्धा", "वर्ण-प्रयोगशाला", "दीप-प्रदर्शनम्", "छाया-अन्वेषकः", "वर्गीकृत्य गणयतु", "फल-गणितम्", "विपरीत-मस्तिष्कम्", "मिश्रणम्!", "प्रधान-बुद्धिः", "वस्तूनि पश्यतु, ततः क्रमं स्मरतु!", "सावधानं गणयतु, ततः सङ्ख्यां चिनुत।", "यत् न योग्यं तत् स्पृशतु।", "आकृति-क्रमं विन्दतु। अग्रे किम्?", "भवतः नेत्रे विरुद्धं मस्तिष्कम्! नियमं पठतु।", "एका वस्तु अदृश्या भविष्यति। जानातु!", "नियमं विन्दतु, ततः अग्रिमां सङ्ख्याम्।", "मायावी इव वर्णान् मिश्रयतु!", "दीपान् पश्यतु, ततः पुनः कुर्वतु।", "भिन्नच्छायायुक्तं फलकं विन्दतु।", "मनसा वर्गीकृत्य, समूहं गणयतु।", "प्रत्येकं फले सङ्ख्या निगूढा। सङ्केतं भिन्दतु!", "पश्यतु, ततः विपरीत-क्रमेण स्पृशतु!", "आश्चर्यम्! एकस्मिन् चक्रे विविधाः प्रहेलिकाः।", "महत् आह्वानम्! सर्वाणि कौशलानि प्रयुङ्क्ताम्।", "सङ्केतः", "पश्यतु स्मरतु च!", "प्रथमं किम् आसीत्?", "अन्तिमं किम् आसीत्?", "{n} सङ्ख्याकं किम् आसीत्?", "अन्त्यात् द्वितीयं किम् आसीत्?", "किम् अदृश्यम् अभवत्?", "सर्वं स्मरतु!", "अग्रिमा सङ्ख्या का?", "कति {x} पश्यसि?", "यत् न योग्यं तत् स्पृशतु!", "आकृति-क्रमे अग्रे किम्?", "अत्र कति {g} सन्ति?", "फलानि", "शाकानि", "स्थलचराः जन्तवः", "समुद्रजीवाः", "वाहनानि", "क्रीडनकानि क्रीडाश्च", "प्रकृति-वस्तूनि", "फल-सङ्केतं समाधत्ताम्!", "समानं वर्णं स्पृशतु!", "मसेः वर्णं स्पृशतु, पदं न!", "पदं यत् वदति तत् स्पृशतु, मसिं उपेक्षताम्!", "रक्तम्", "नीलम्", "हरितम्", "पीतम्", "नीललोहितम्", "नारङ्गम्", "गुलाबीयम्", "मरकतम्", "दीपान् पश्यतु!", "भवतः वारः!", "क्रमं पश्यतु!", "अधुना विपरीत-क्रमेण स्पृशतु!", "भिन्नां छायां विन्दतु!", "कः वर्णः प्राप्स्यते?", "कः वर्णः न्यूनः?", "साधु!", "उत्तमम्!", "अद्भुतम्!", "प्रशस्तम्!", "ज्वलति!", "अहो! अन्यत् चिनुत", "अहो! पुनः पश्यतु", "हृदयानि समाप्तानि!", "एकं असत्यम् उत्तरम् अपसारितम्!", "सम्पूर्णम्", "अद्भुतम्!", "अहा!", "महातारकः!", "लेजेण्ड्!", "शुद्धम्", "उत्तमा शृङ्खला", "हृदयानि", "अङ्काः", "अधिकम्", "अग्रे", "पुनः क्रीडतु", "स्वल्पेन अवशिष्टम्!", "भवता {b} मध्ये {a} समाहितानि। प्रायः सिद्धम्!", "दीर्घं श्वासं गृहीत्वा पुनः प्रयतताम्!", "पुनः प्रयतताम्", "-", "ध्वनिं परीक्षताम्", "ध्वनिं सक्रियं कर्तुं स्पृशतु", "भाषां चिनुत", "भवता सर्वे 100 स्तराः पूर्णाः! नवीनाः स्तराः शीघ्रम् आगमिष्यन्ति।"]}, "kok": {"n": "कोंकणी", "b": 1, "r": 0, "s": ["खेळ", "तुमचें आव्हान वेंचो!", "तुमची शैली वेंचो!", "सोपें", "प्रो", "लीजेंड", "-", "सोपें आनी मजेदार", "समतोल आव्हान", "जलद आनी कठीण", "संवसार", "फुडें", "लेव्हल", "नवें!", "लेव्हल खेळ", "सेटिंग्स", "सगळो आवाज", "इफेक्ट्स", "संगीत", "खेळाडूची शैली", "भास", "प्रगती रीसेट करचीं", "खात्री करपाक परतून टॅप करात", "बरें", "थांबयलें", "चालू दवरात", "परतून सुरू करचें", "लेव्हल्स", "लेव्हल सोडपाची?", "ह्या लेव्हलांतली तुमची प्रगती वतली.", "रावात", "सोडात", "चल सुरू करूंया!", "मेमरी फ्लॅश", "मोजून धर", "वेगळें कितें?", "पॅटर्न पार्टी", "रंगांची टक्कर", "गायब जादू", "नंबर निंजा", "रंग लॅब", "लायट शो", "शेड सोदपी", "वेगळें करून मोज", "फळ गणित", "उलटो मेंदू", "मिक्स-अप!", "बॉस ब्रेन", "वस्तू पळय, मागीर क्रम याद दवर!", "जतनाय घेवन मोज, मागीर संख्या वेंच.", "जें मेळना तातूंत टॅप कर.", "पॅटर्न सोद. फुडें कितें येतलें?", "तुजे दोळे वि. मेंदू! नेम वाच.", "एक वस्त गायब जातली. वळख!", "नेम सोद, मागीर फुडली संख्या.", "जादुगारा सारके रंग मिसळ!", "दिवे पळय, मागीर परतून कर.", "वेगळ्या शेडाची टाईल सोद.", "मनांतूंच वेगळें कर, मागीर गट मोज.", "दरेक फळांत एक संख्या लिपल्या. कोड फोड!", "पळय, मागीर उलट्या क्रमान टॅप कर!", "सरप्राइज! एका राऊंडांत वेगवेगळीं कोडीं.", "व्हडलें आव्हान! तुजीं सगळीं कौशल्यां वाप.", "सूचना", "पळय आनी याद दवर!", "पयलें कितें आशिल्लें?", "शेवटचें कितें आशिल्लें?", "नंबर {n} कितें आशिल्लें?", "शेवटल्यान दुसरें कितें आशिल्लें?", "कितें गायब जालें?", "सगळें याद दवर!", "फुडली संख्या कितली?", "तुका किते {x} दिसतात?", "जें मेळना तातूंत टॅप कर!", "पॅटर्नांत फुडें कितें येतलें?", "हांगा किते {g} आसात?", "फळां", "भाजी", "जमनीवयले प्राणी", "दर्याचे जीव", "वाहनां", "खेळणीं आनी खेळ", "निसर्गाच्यो वस्तू", "फळाचो कोड सोडय!", "तोच रंग टॅप कर!", "शाईचो रंग टॅप कर, उतर न्हय!", "उतर सांगता तें टॅप कर, शाईक दुर्लक्ष कर!", "रातें", "निळें", "हिरवें", "पिवळें", "जांभळें", "केशरी", "गुलाबी", "पिरोजी", "दिवे पळय!", "तुजी पाळी!", "क्रम पळय!", "आतां उलट्या क्रमान टॅप कर!", "वेगळी शेड सोद!", "खंयचो रंग मेळटलो?", "खंयचो रंग गायब आसा?", "बरें!", "मस्त!", "जबरदस्त!", "शानदार!", "आग लायली!", "अरे! दुसरें वेंच", "अरे! परतून पळय", "काळीज सपलें!", "एक चुकीचें जाप काडलें!", "पुराय", "जबरदस्त!", "वाह!", "सुपरस्टार!", "लीजेंड!", "बरोब्बर", "उत्तम मालिका", "काळीज", "गुण", "बोनस", "फुडें", "परतून खेळ", "थोडक्यांत चुकलें!", "तुवें {b} पैकी {a} सोडयले. लागीं लागीं जालें!", "खोल सास घे आनी परतून यत्न कर!", "परतून यत्न करचो", "-", "आवाज तपास", "आवाज चालू करपाक टॅप करात", "भास वेंचो", "तुवें सगळे 100 लेव्हल पुराय केले! नवे लेव्हल लवकरच येतले."]}, "mai": {"n": "मैथिली", "b": 1, "r": 0, "s": ["खेलू", "अपन चुनौती चुनू!", "अपन शैली चुनू!", "सहज", "प्रो", "लीजेंड", "-", "सहज आ मजेदार", "संतुलित चुनौती", "तेज आ कठिन", "दुनिया", "अगिला", "लेवल", "नव!", "लेवल खेलू", "सेटिंग्स", "सभ आवाज", "इफेक्ट्स", "संगीत", "खेलाड़ीक शैली", "भाषा", "प्रगति रीसेट करू", "पक्का करबाक लेल फेर टैप करू", "ठीक अछि", "रुकल", "जारी राखू", "फेर सँ शुरू करू", "लेवल्स", "लेवल छोड़ब?", "एहि लेवलमे अहाँक प्रगति समाप्त भ' जाएत।", "रुकू", "छोड़ू", "चलू शुरू करी!", "मेमोरी फ्लैश", "गिनू आ पकड़ू", "अलग कोन?", "पैटर्न पार्टी", "रंगक टक्कर", "गायब जादू", "नंबर निंजा", "रंग लैब", "लाइट शो", "शेड खोजकर्ता", "छाँटू आ गिनू", "फल गणित", "उल्टा दिमाग", "मिक्स-अप!", "बॉस ब्रेन", "वस्तु देखू, फेर क्रम मोन राखू!", "धियानसँ गिनू, फेर संख्या चुनू।", "जे मेल नहि खाइत अछि तकरा टैप करू।", "पैटर्न खोजू। आगाँ की आएत?", "अहाँक आँखि बनाम दिमाग! नियम पढ़ू।", "एकटा वस्तु गायब भ' जाएत। चिन्हू!", "नियम खोजू, फेर अगिला संख्या।", "जादूगर जकाँ रंग मिलाउ!", "बत्ती देखू, फेर दोहराउ।", "अलग शेड बला टाइल खोजू।", "मोनहि मोन छाँटू, फेर समूह गिनू।", "हर फलमे एकटा संख्या नुकाएल अछि। कोड तोड़ू!", "देखू, फेर उल्टा क्रममे टैप करू!", "सरप्राइज! एक राउंडमे अलग-अलग पहेली।", "पैघ चुनौती! अपन सभ कौशल लगाउ।", "संकेत", "देखू आ मोन राखू!", "पहिल कोन छल?", "अंतिम कोन छल?", "नंबर {n} कोन छल?", "अंतिमसँ दोसर कोन छल?", "कोन गायब भ' गेल?", "सभ मोन राखू!", "अगिला संख्या कोन अछि?", "अहाँकेँ कतेक {x} देखा पड़ैत अछि?", "जे मेल नहि खाइत अछि तकरा टैप करू!", "पैटर्नमे आगाँ की आएत?", "एतय कतेक {g} अछि?", "फल", "तरकारी", "जमीनक जानवर", "समुद्री जीव", "गाड़ी", "खेलौना आ खेल", "प्रकृतिक वस्तु", "फलक कोड हल करू!", "वएह रंग टैप करू!", "स्याहीक रंग टैप करू, शब्द नहि!", "शब्द जे कहैत अछि से टैप करू, स्याहीकेँ अनदेखा करू!", "लाल", "नीला", "हरियर", "पीयर", "बैंगनी", "नारंगी", "गुलाबी", "फिरोजी", "बत्ती देखू!", "अहाँक पारी!", "क्रम देखू!", "आब उल्टा क्रममे टैप करू!", "अलग शेड खोजू!", "कोन रंग भेटत?", "कोन रंग गायब अछि?", "बढ़ियाँ!", "शानदार!", "कमाल!", "जबरदस्त!", "आगि लगा देलहुँ!", "ओह! दोसर चुनू", "ओह! फेर देखू", "दिल खतम!", "एकटा गलत उत्तर हटा देल गेल!", "पूरा", "कमाल!", "वाह!", "सुपरस्टार!", "लीजेंड!", "सही", "सभसँ नीक सिलसिला", "दिल", "अंक", "बोनस", "आगाँ", "फेर खेलू", "बस थोड़ेक सँ चूकि गेलहुँ!", "अहाँ {b} मे सँ {a} हल कएलहुँ। लगभग भ' गेल!", "गहींर साँस लिअ आ फेर प्रयास करू!", "फेर प्रयास करू", "-", "आवाज जाँचू", "आवाज चालू करबाक लेल टैप करू", "भाषा चुनू", "अहाँ सभ 100 लेवल पूरा कए लेलहुँ! नव लेवल जल्दी आबि रहल अछि।"]}, "doi": {"n": "डोगरी", "b": 1, "r": 0, "s": ["खेड़ो", "अपनी चुनौती चुनो!", "अपनी शैली चुनो!", "सौखा", "प्रो", "लीजेंड", "-", "सौखा ते मजेदार", "संतुलत चुनौती", "तेज़ ते मुश्कल", "दुनिया", "अगला", "लेवल", "नमां!", "लेवल खेड़ो", "सेटिंग्स", "सारी आवाज़", "इफेक्ट्स", "संगीत", "खिलाड़ी दी शैली", "भाशा", "प्रगति रीसेट करो", "पक्का करने आस्तै फिरी टैप करो", "ठीक ऐ", "रुकेआ", "जारी रक्खो", "फिरी शुरू करो", "लेवल्स", "लेवल छोड़ना ऐ?", "इस लेवल च तुंदी प्रगति खत्म होई जाग।", "रुको", "छोड़ो", "चलो शुरू करचे!", "मेमोरी फ्लैश", "गिनो ते पकड़ो", "अलग कुन?", "पैटर्न पार्टी", "रंगें दी टक्कर", "गायब जादू", "नंबर निंजा", "रंग लैब", "लाइट शो", "शेड खोजी", "छंडो ते गिनो", "फल गणित", "उल्टा दिमाग", "मिक्स-अप!", "बॉस ब्रेन", "चीजां दिखो, फिरी क्रम याद रक्खो!", "ध्यान कन्नै गिनो, फिरी संख्या चुनो।", "जेह्ड़ा मेल नेईं खांदा उसी टैप करो।", "पैटर्न लब्भो। अगली केह् औग?", "तुंदी अक्खीं बनाम दिमाग! नियम पढ़ो।", "इक चीज़ गायब होग। पन्छानो!", "नियम लब्भो, फिरी अगली संख्या।", "जादूगर आंगर रंग रलाओ!", "बत्तियां दिखो, फिरी दोहराओ।", "अलग शेड आली टाइल लब्भो।", "मन च छंडो, फिरी समूह गिनो।", "हर फल च इक संख्या लकोई दी ऐ। कोड तोड़ो!", "दिखो, फिरी उल्टे क्रम च टैप करो!", "सरप्राइज! इक राउंड च बक्ख-बक्ख पहेलियां।", "बड्डी चुनौती! अपनी सारी काबिलियत लाओ।", "संकेत", "दिखो ते याद रक्खो!", "पैहला कुन हा?", "आखरी कुन हा?", "नंबर {n} कुन हा?", "आखरी थमां दूआ कुन हा?", "कुन गायब होई गेआ?", "सब याद रक्खो!", "अगली संख्या कुन ऐ?", "तुसें कित्ते {x} दिक्खदे ओ?", "जेह्ड़ा मेल नेईं खांदा उसी टैप करो!", "पैटर्न च अगली केह् औग?", "इत्थें कित्ते {g} न?", "फल", "सब्जियां", "जमीन दे जानवर", "समुंदरी जीव", "गड्डियां", "खिद्दू ते खेढां", "कुदरत दियां चीजां", "फल कोड हल करो!", "उसी रंग गी टैप करो!", "स्याही दे रंग गी टैप करो, शब्द गी नेईं!", "शब्द जे आखदा ऐ उसी टैप करो, स्याही गी अनदिक्खा करो!", "लाल", "नीला", "हरा", "पीला", "जामनी", "नारंगी", "गुलाबी", "फिरोजी", "बत्तियां दिखो!", "तुंदी बारी!", "क्रम दिखो!", "हुन उल्टे क्रम च टैप करो!", "अलग शेड लब्भो!", "कुन रंग बनग?", "कुन रंग गायब ऐ?", "बड़ा बधिया!", "शानदार!", "कमाल!", "जबरदस्त!", "अग्ग लाई दित्ती!", "ओह! दूआ चुनो", "ओह! फिरी दिखो", "दिल खत्म!", "इक गलत जवाब हटाई दित्ता!", "पूरा", "कमाल!", "वाह!", "सुपरस्टार!", "लीजेंड!", "सही", "सबने बधिया सिलसिला", "दिल", "अंक", "बोनस", "अग्गें", "फिरी खेड़ो", "बस थोड़ा जेहा रेही गेआ!", "तुसें {b} चा {a} हल कित्ते। लगभग होई गेआ!", "डूंगा साह् लैओ ते फिरी कोशश करो!", "फिरी कोशश करो", "-", "आवाज़ जाचो", "आवाज़ चालू करने आस्तै टैप करो", "भाशा चुनो", "तुसें सारे 100 लेवल पूरे करी लैते! नमें लेवल जल्दी औने आले न।"]}, "sd": {"n": "سنڌي", "b": 1, "r": 1, "s": ["راند ڪريو", "پنهنجو چيلنج چونڊيو!", "پنهنجو انداز چونڊيو!", "آسان", "پرو", "ليجنڊ", "-", "آسان ۽ مزيدار", "متوازن چيلنج", "تيز ۽ سخت", "دنيا", "اڳيون", "ليول", "نئون!", "ليول راند ڪريو", "سيٽنگون", "سموري آواز", "اثرات", "موسيقي", "رانديگر جو انداز", "ٻولي", "ترقي ري سيٽ ڪريو", "تصديق لاءِ ٻيهر ٽيپ ڪريو", "ٺيڪ آهي", "روڪيل", "جاري رکو", "ٻيهر شروع ڪريو", "ليولز", "ليول ڇڏيو؟", "هن ليول ۾ توهان جي ترقي ختم ٿي ويندي.", "رڪجو", "ڇڏيو", "اچو شروع ڪريون!", "ميموري فليش", "ڳڻيو ۽ پڪڙيو", "مختلف ڪهڙو؟", "پيٽرن پارٽي", "رنگن جو ٽڪراءُ", "غائب جادو", "نمبر نِنجا", "رنگ ليب", "لائيٽ شو", "شيڊ ڳوليندڙ", "ڇانٽيو ۽ ڳڻيو", "ميوي جو حساب", "اُلٽو دماغ", "مڪس اپ!", "باس برين", "شيون ڏسو، پوءِ ترتيب ياد ڪريو!", "ڌيان سان ڳڻيو، پوءِ انگ چونڊيو.", "جيڪو نٿو ملي ان تي ٽيپ ڪريو.", "پيٽرن ڳوليو. اڳيان ڇا ايندو؟", "توهان جون اکيون بمقابلہ دماغ! قاعدو پڙهو.", "هڪ شيءِ غائب ٿي ويندي. سڃاڻو!", "قاعدو ڳوليو، پوءِ ايندڙ انگ.", "جادوگر وانگر رنگ ملايو!", "بتيون ڏسو، پوءِ ورجايو.", "مختلف شيڊ واري ٽائل ڳوليو.", "ذهن ۾ ڇانٽيو، پوءِ گروپ ڳڻيو.", "هر ميوي ۾ هڪ انگ لڪل آهي. ڪوڊ ٽوڙيو!", "ڏسو، پوءِ اُلٽي ترتيب ۾ ٽيپ ڪريو!", "سرپرائز! هڪ راؤنڊ ۾ مختلف پهيليون.", "وڏو چيلنج! پنهنجون سڀ صلاحيتون استعمال ڪريو.", "اشارو", "ڏسو ۽ ياد رکو!", "پهريون ڪهڙو هو؟", "آخري ڪهڙو هو؟", "نمبر {n} ڪهڙو هو؟", "آخري کان ٻيو ڪهڙو هو؟", "ڪهڙو غائب ٿي ويو؟", "سڀ ياد رکو!", "ايندڙ انگ ڪهڙو آهي؟", "توهان کي ڪيترا {x} نظر اچن ٿا؟", "جيڪو نٿو ملي ان تي ٽيپ ڪريو!", "پيٽرن ۾ اڳيان ڇا ايندو؟", "هتي ڪيترا {g} آهن؟", "ميوا", "ڀاڄيون", "زميني جانور", "سمنڊي جاندار", "گاڏيون", "رانديڪا ۽ رانديون", "قدرتي شيون", "ميوي جو ڪوڊ حل ڪريو!", "ساڳيو رنگ ٽيپ ڪريو!", "مس جو رنگ ٽيپ ڪريو، لفظ نه!", "لفظ جيڪو چوي اهو ٽيپ ڪريو، مس کي نظرانداز ڪريو!", "ڳاڙهو", "نيرو", "سائو", "پيلو", "واڱڻائي", "نارنگي", "گلابي", "فيروزي", "بتيون ڏسو!", "توهان جي واري!", "ترتيب ڏسو!", "هاڻي اُلٽي ترتيب ۾ ٽيپ ڪريو!", "مختلف شيڊ ڳوليو!", "ڪهڙو رنگ ملندو؟", "ڪهڙو رنگ غائب آهي؟", "شاباش!", "ڏاڍو سٺو!", "ڪمال!", "شاندار!", "باھ لڳائي ڇڏي!", "اوهه! ٻيو چونڊيو", "اوهه! ٻيهر ڏسو", "دل ختم!", "هڪ غلط جواب هٽايو ويو!", "مڪمل", "ڪمال!", "واهه!", "سپر اسٽار!", "ليجنڊ!", "صحيح", "بهترين سلسلو", "دل", "پوائنٽس", "بونس", "اڳيون", "ٻيهر راند ڪريو", "بس ٿورو رهجي ويو!", "توهان {b} مان {a} حل ڪيا. تقريباً ٿي ويو!", "گهرو ساهه کڻو ۽ ٻيهر ڪوشش ڪريو!", "ٻيهر ڪوشش ڪريو", "-", "آواز ٽيسٽ ڪريو", "آواز آن ڪرڻ لاءِ ٽيپ ڪريو", "ٻولي چونڊيو", "توهان سڀ 100 ليول مڪمل ڪيا! نوان ليول جلد اچي رهيا آهن."]}};
+const LANG_ORDER=['en','hi','bn','mr','te','ta','gu','ur','kn','or','ml','pa','as','mai','sa','ne','kok','doi','sd'];
+const RTL={ur:1,sd:1,ks:1};
+let LANG='en';
+function T(k,v){const i=KI[k];let s=LANGS[LANG].s[i];if(!s||s==='-')s=LANGS.en.s[i];if(v)s=s.replace(/\{(\w)\}/g,(m,x)=>v[x]!==undefined?v[x]:m);return s}
+/* Language: user's choice stored in the cloud save (S.lang), else YouTube's getLanguage() (Playables rule: never navigator.language). English is the default. */
+async function detectLang(){let c=S.lang;
+ if(!(c&&LANGS[c])&&SDK.inPlayables){try{const l=await SDK.getLanguage();c=String(l||'').toLowerCase().split(/[-_]/)[0]}catch(e){}}
+ if(c&&LANGS[c])LANG=c}
+function setLang(c,persist){if(!LANGS[c])return;LANG=c;if(persist){S.lang=c;save()}applyLang()}
+function applyLang(){document.documentElement.lang=LANG;$('app').classList.toggle('rtl',!!RTL[LANG]);
+ document.querySelectorAll('[data-t]').forEach(e=>{e.textContent=(e.dataset.p||'')+T(e.dataset.t)+(e.dataset.s||'')});
+ $('langBtn').textContent=LANGS[LANG].n;
+ if(state==='who')drawWho();else if(state==='map')renderMap();else if(state==='intro'){PRV=lvInfo(level);$('introLv').textContent=T('lvl')+' '+level;$('introT').textContent=PRV.t;$('introI').textContent=PRV.i}
+ $('pauseOv').classList.contains('on')||drawSet()}
+/* ================= state + save (Playables rules: cloud save only via saveData; loadData awaited first) ================= */
+let S={p:null,st:{},hints:3,sfx:true,music:true,sound:true,seen:{},score:0,best:0,v:4};
+let loaded;
+function snapshot(){S.best=Math.max(S.best||0,S.score||0);return JSON.stringify(S)}
+function save(){SDK.saveData(snapshot())}
+/* merge any (possibly older-version / corrupt) saved JSON into S, validating every field */
+function mergeRaw(raw){if(!raw||typeof raw!=='string')return;let o;try{o=JSON.parse(raw)}catch(e){return}if(!o||typeof o!=='object')return;
+ if(o.st&&typeof o.st==='object')for(const k in o.st){const n=+k,v=+o.st[k];if(n>=1&&n<=100&&v>=1&&v<=3)S.st[n]=Math.max(S.st[n]||0,v)}
+ if(typeof o.score==='number'&&isFinite(o.score))S.score=Math.max(S.score,Math.floor(o.score));
+ if(typeof o.best==='number'&&isFinite(o.best))S.best=Math.max(S.best||0,Math.floor(o.best));
+ if(typeof o.hints==='number')S.hints=Math.max(0,Math.min(9,Math.floor(o.hints)));
+ if(typeof o.sfx==='boolean')S.sfx=o.sfx;if(typeof o.music==='boolean')S.music=o.music;
+ if(o.seen&&typeof o.seen==='object')for(const k in o.seen)if(TYPES[k])S.seen[k]=1;
+ if(typeof o.lang==='string'&&LANGS[o.lang])S.lang=o.lang;
+ let p=o.p;if(p==='kids')p='easy';if(p==='teen'||p==='men')p='pro';if(p==='adult')p='legend';if(PROFS[p])S.p=p}
+async function load(){const raw=await SDK.loadData({key:'cm3v2',timeoutMs:6000,onLate:v=>{mergeRaw(v);if(PROFS[S.p])PR=PROFS[S.p];if(S.lang&&S.lang!==LANG){LANG=S.lang;applyLang()}}});
+ mergeRaw(raw);if(PROFS[S.p])PR=PROFS[S.p];else S.p=null}
+const unlocked=()=>{let u=1;while(u<100&&S.st[u])u++;return u};
+const totalStars=()=>Object.values(S.st).reduce((a,b)=>a+b,0);
+/* ================= timers (pause aware). Pause/resume ONLY via the Playables SDK (no Page Visibility API) ================= */
+let tms=[],ovl=false,ytp=false,lastT=performance.now();
+const paused=()=>ovl||ytp;
+const later=(ms,f)=>{const o={t:ms,f};tms.push(o);return o},clearT=()=>{tms=[]};
+setInterval(()=>{const n=performance.now(),dt=Math.min(120,n-lastT);lastT=n;if(paused())return;tms.forEach(o=>o.t-=dt);const due=tms.filter(o=>o.t<=0);if(!due.length)return;tms=tms.filter(o=>o.t>0);due.forEach(o=>{try{o.f()}catch(e){console.error(e)}})},40);
+function syncPause(){$('app').classList.toggle('paused',paused());if(ac){if(ytp||!audioOK){ac.suspend&&ac.suspend()}else if(ac.state==='suspended'){ac.resume&&ac.resume()}}}
+SDK.onPause(()=>{ytp=true;save();syncPause()});
+SDK.onResume(()=>{ytp=false;syncPause()});
+SDK.onAudioChange(v=>{audioOK=v;syncPause()});
+window.addEventListener('error',()=>SDK.logError());
+
+/* ================= audio (100% synthesized in code = original, copyright-free) ================= */
+let ac=null,master=null,sfxBus=null,musBus=null,noiseBuf=null;
+const silent=()=>ytp||!audioOK;
+const sndOn=()=>!silent();
+const mtof=m=>440*Math.pow(2,(m-69)/12);
+function AC(){if(!ac){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;ac=new C();
+ const comp=ac.createDynamicsCompressor();comp.threshold.value=-10;comp.knee.value=8;comp.ratio.value=8;comp.attack.value=.004;comp.release.value=.2;
+ master=ac.createGain();master.gain.value=1;master.connect(comp);comp.connect(ac.destination);
+ sfxBus=ac.createGain();sfxBus.gain.value=1.9;sfxBus.connect(master);musBus=ac.createGain();musBus.gain.value=0;musBus.connect(master);ac.onstatechange=()=>{if(ac.state==='running')hideToast()};
+ noiseBuf=ac.createBuffer(1,ac.sampleRate,ac.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}
+ if(ac.state==='suspended'&&!silent())ac.resume();return ac}
+function tone(f,t,d,o){o=o||{};const a=AC();if(!a)return;const osc=a.createOscillator(),g=a.createGain();osc.type=o.type||'sine';osc.frequency.setValueAtTime(f,t);if(o.to)osc.frequency.exponentialRampToValueAtTime(o.to,t+d);if(o.det)osc.detune.value=o.det;
+ const v=o.v||.1;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v,t+(o.at||.012));g.gain.exponentialRampToValueAtTime(.0001,t+d);
+ let n=osc;if(o.lp){const fl=a.createBiquadFilter();fl.type='lowpass';fl.frequency.value=o.lp;osc.connect(fl);n=fl}n.connect(g);g.connect(o.bus||sfxBus);osc.start(t);osc.stop(t+d+.05)}
+function noise(t,d,o){o=o||{};const a=AC();if(!a)return;const s=a.createBufferSource();s.buffer=noiseBuf;const fl=a.createBiquadFilter();fl.type=o.type||'bandpass';fl.frequency.setValueAtTime(o.f||2000,t);if(o.to)fl.frequency.exponentialRampToValueAtTime(o.to,t+d);fl.Q.value=o.q||1;
+ const g=a.createGain();g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(o.v||.1,t+(o.at||.01));g.gain.exponentialRampToValueAtTime(.0001,t+d);s.connect(fl);fl.connect(g);g.connect(o.bus||sfxBus);s.start(t,Math.random()*.15);s.stop(t+d+.05)}
+const PADF=[392,440,523,587,659,784];
+/* ---------- sound effects ---------- */
+function sfx(k,i,force){if((!S.sfx&&!force)||!sndOn())return;try{const a=AC();if(!a)return;const t=a.currentTime+.005;i=i||0;switch(k){
+ case'click':tone(740,t,.09,{to:520,v:.09});noise(t,.03,{type:'highpass',f:5000,v:.04});break;
+ case'good':{const b=60+Math.min(i,7)*2;[0,4,7,12].forEach((s,j)=>{tone(mtof(b+s),t+j*.06,.34,{type:'triangle',v:.1,lp:3500});tone(mtof(b+s+12),t+j*.06,.2,{v:.03})});noise(t+.18,.3,{type:'highpass',f:7000,v:.035});break}
+ case'bad':tone(240,t,.25,{to:110,v:.16});noise(t,.12,{type:'lowpass',f:500,v:.12});tone(180,t+.09,.2,{type:'triangle',to:120,v:.06,lp:900});break;
+ case'heart':tone(520,t,.3,{type:'triangle',to:180,v:.08});break;
+ case'star':{const f=mtof(72+i*4);tone(f,t,.7,{v:.12,at:.005});tone(f*2,t,.5,{v:.05});tone(f*3,t,.3,{v:.025});noise(t,.25,{type:'highpass',f:8000,v:.04});break}
+ case'win':{[[60,64,67,72],[65,69,72,77],[67,71,74,79],[72,76,79,84]].forEach((c,j)=>c.forEach((m,q)=>tone(mtof(m),t+j*.16+q*.025,.45,{type:'sawtooth',v:.035,lp:2200,at:.02})));noise(t+.5,.8,{type:'highpass',f:6000,to:9000,v:.06,at:.05});[84,88,91,96].forEach((m,j)=>tone(mtof(m),t+.65+j*.07,.5,{v:.07}));break}
+ case'fail':[67,64,60,55].forEach((m,j)=>tone(mtof(m),t+j*.2,.45,{type:'sawtooth',v:.04,to:mtof(m)*.94,lp:900}));break;
+ case'pad':{const f=PADF[i%PADF.length];tone(f,t,.42,{v:.14,at:.004});tone(f*2,t,.18,{v:.04});tone(f*4,t,.06,{v:.02});break}
+ case'poof':noise(t,.35,{f:3000,to:400,q:.8,v:.14});tone(800,t,.2,{to:200,v:.07});break;
+ case'whoosh':noise(t,.28,{f:400,to:2600,q:.9,v:.06,at:.1});break;
+ case'flip':tone(900,t,.05,{type:'square',v:.03,lp:2500});tone(1200,t+.03,.05,{type:'square',v:.03,lp:2500});break;
+ case'hint':[0,4,7,12,16].forEach((s,j)=>tone(mtof(72+s),t+j*.05,.3,{v:.07}));noise(t,.4,{type:'highpass',f:7000,v:.03});break;
+ case'streak':{const b=64+Math.min(i,10);[0,7,12].forEach((s,j)=>tone(mtof(b+s),t+j*.07,.25,{type:'square',v:.04,lp:3000}));break}
+ case'go':[60,67,72].forEach((m,j)=>tone(mtof(m),t+j*.07,.2,{type:'triangle',v:.08}));break;
+}}catch(e){}}
+/* ---------- background music: 3 original tracks (one per player style), generated live ---------- */
+const CH={C:{n:[60,64,67],r:36},G:{n:[55,59,62],r:43},Am:{n:[57,60,64],r:45},F:{n:[53,57,60],r:41},Dm:{n:[62,65,69],r:38},Em:{n:[64,67,71],r:40},
+ Cmaj7:{n:[60,64,67,71],r:36},Am7:{n:[57,60,64,67],r:45},Dm7:{n:[62,65,69,72],r:38},G7:{n:[55,59,62,65],r:43},Em7:{n:[64,67,71,74],r:40}};
+const MEL=[69,72,74,76,79,81,84,86];
+const MPR={
+ easy:{bpm:104,progs:[['C','G','Am','F'],['C','Am','F','G'],['F','C','G','Am'],['C','F','Dm','G']]},
+ pro:{bpm:88,progs:[['Cmaj7','Am7','Dm7','G7'],['Am7','Dm7','G7','Cmaj7'],['Dm7','G7','Cmaj7','Am7'],['Cmaj7','Em7','Am7','G7']]},
+ legend:{bpm:126,progs:[['Am','F','C','G'],['Am','G','F','Em'],['F','G','Am','Am'],['Am','C','G','F']]}};
+let mNext=0,mStep=0,mProf=null,mWorld=-1,mMotif=null;
+function musicStep(P,st,t){const bar=Math.floor(st/16),s=st%16,prog=P.progs[curWorld%P.progs.length],ch=CH[prog[bar%4]],id=PR.id,V=o=>Object.assign({bus:musBus},o);
+ if(!mMotif||(s===0&&bar%4===0))mMotif=Array.from({length:16},(_,i)=>((i%2===0||Math.random()<.2)&&Math.random()<(id==='pro'?.35:id==='easy'?.6:.5))?R(0,5):-1);
+ if(id==='easy'){
+  if(s%8===0){tone(mtof(ch.r+12),t,.4,V({v:.16}));tone(120,t,.14,V({to:45,v:.12}))}
+  if(s%2===1)noise(t,.05,V({type:'highpass',f:7000,v:.025}));
+  if(s===0||s===6||s===10)ch.n.forEach((m,j)=>tone(mtof(m+(s===6?12:0)),t+j*.012,.45,V({type:'triangle',v:.04,lp:2500})));
+  const m=mMotif[s];if(m>=0){const f=mtof(MEL[m]);tone(f,t,.32,V({v:.09,at:.005}));tone(f*2,t,.12,V({v:.03}))}
+  if(s===15&&bar%2===1)[0,1,2].forEach(j=>tone(mtof(88+j*3),t+j*.05,.3,V({v:.03})));
+ }else if(id==='pro'){const tt=t+(s%2?.035:0);
+  if(s===0||s===10)tone(130,tt,.16,V({to:42,v:.2}));
+  if(s===8){noise(tt,.14,V({f:1800,q:.7,v:.1}));tone(190,tt,.1,V({type:'triangle',v:.05}))}
+  if(s%2===0)noise(tt,.04,V({type:'highpass',f:8000,v:.03}));else if(Math.random()<.3)noise(tt,.03,V({type:'highpass',f:8000,v:.015}));
+  if(s===0||s===7)ch.n.forEach((m,j)=>{tone(mtof(m),tt+j*.015,1,V({v:.045,lp:1600,at:.03}));tone(mtof(m+12),tt+j*.015,.6,V({type:'triangle',v:.015,lp:1400}))});
+  if(s===0||s===6||s===10||s===14)tone(mtof(ch.r+12),tt,.34,V({type:'triangle',v:.16,lp:700}));
+  const m=mMotif[s];if(m>=0)tone(mtof(MEL[m]-12),tt,.5,V({v:.06,lp:2200,at:.02}));
+ }else{
+  if(s%4===0){tone(150,t,.18,V({to:42,v:.26}));noise(t,.02,V({type:'highpass',f:3000,v:.06}))}
+  if(s===4||s===12){noise(t,.14,V({f:1600,q:.6,v:.11}));noise(t,.05,V({type:'highpass',f:6000,v:.05}))}
+  if(s%4===2)noise(t,.12,V({type:'highpass',f:9000,v:.05}));else if(s%2===1)noise(t,.03,V({type:'highpass',f:9000,v:.02}));
+  if([0,2,3,6,8,10,11,14].indexOf(s)>=0)tone(mtof(ch.r+12),t,.16,V({type:'square',v:.07,lp:620}));
+  const note=ch.n[[0,1,2,1,0,2,1,2][s%8]%ch.n.length]+12;tone(mtof(note),t,.13,V({type:'sawtooth',v:.03,lp:3600,det:-6}));tone(mtof(note),t,.13,V({type:'sawtooth',v:.03,lp:3600,det:6}));
+  const m=mMotif[s];if(m>=0&&bar%2===1)tone(mtof(MEL[m]),t,.2,V({type:'square',v:.045,lp:3000,at:.005}));
+ }}
+function musicTick(){if(!ac||!musBus)return;const now=ac.currentTime,on=S.music&&!silent();
+ musBus.gain.setTargetAtTime(on?(paused()?.4:(state==='play'||state==='intro')?.95:1.3):0,now,.25);
+ if(!on||ac.state!=='running'){mNext=0;return}
+ if(mProf!==PR.id||mWorld!==curWorld){mProf=PR.id;mWorld=curWorld;mStep=0;mNext=0;mMotif=null}
+ if(!mNext||mNext<now)mNext=now+.06;const P=MPR[PR.id];
+ while(mNext<now+.25){musicStep(P,mStep,mNext);mNext+=60/P.bpm/4;mStep++}}
+setInterval(musicTick,60);
+/* ---- audio unlock: browsers need a user gesture; try on every kind of gesture until the context is running ---- */
+let silentPlayed=false,toastTimer=null;
+function showToast(){const t=$('sndToast');t.textContent='🔊 '+T('enableSnd');t.style.display=''}
+function hideToast(){const t=$('sndToast');if(t)t.style.display='none'}
+function checkToastSoon(){clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(ac&&ac.state!=='running'&&!silent()&&(S.sfx||S.music))showToast();else hideToast()},800)}
+function tryUnlock(){const a=AC();if(!a)return;
+ const ok=()=>{if(a.state==='running'){if(!silentPlayed){silentPlayed=true;try{const s=a.createBufferSource();s.buffer=a.createBuffer(1,1,22050);s.connect(a.destination);s.start(0)}catch(e){}}hideToast()}};
+ if(a.state!=='running'&&!silent()){try{const p=a.resume();p&&p.then&&p.then(ok,()=>{})}catch(e){}}ok()}
+['pointerdown','pointerup','touchend','click','keydown'].forEach(ev=>document.addEventListener(ev,()=>{tryUnlock();checkToastSoon()},{capture:true,passive:true}));
+$('sndToast').onclick=()=>{tryUnlock();checkToastSoon()};
+
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button');if(!b||b.matches('.opt,.pad,.tile,.lt'))return;sfx('click')});
+/* ================= visuals ================= */
+const MASCOT='<svg viewBox="0 0 100 100" class="mascot" aria-hidden="true"><ellipse cx="50" cy="93" rx="26" ry="5" fill="#0002"/><g class="mbody"><circle cx="50" cy="54" r="38" fill="url(#mg)" stroke="#e87b00" stroke-width="2.5"/><g transform="translate(50 17)"><path d="M0 0L-18-10Q-24 0-18 10Z" fill="#ff5fa8"/><path d="M0 0L18-10Q24 0 18 10Z" fill="#ff5fa8"/><circle r="5.5" fill="#ff9ccc"/></g><g class="eyes"><ellipse cx="37" cy="52" rx="6" ry="8" fill="#2b2159"/><ellipse cx="63" cy="52" rx="6" ry="8" fill="#2b2159"/><circle cx="39" cy="49" r="2.4" fill="#fff"/><circle cx="65" cy="49" r="2.4" fill="#fff"/></g><ellipse cx="27" cy="64" rx="6" ry="4" fill="#ff6a7f" opacity=".55"/><ellipse cx="73" cy="64" rx="6" ry="4" fill="#ff6a7f" opacity=".55"/><path class="m m-happy" d="M37 65Q50 84 63 65Z" fill="#7a1f3d" stroke="#2b2159" stroke-width="2.5" stroke-linejoin="round"/><path class="m m-sad" d="M40 76Q50 65 60 76" fill="none" stroke="#2b2159" stroke-width="3.2" stroke-linecap="round"/><ellipse class="m m-think" cx="50" cy="72" rx="4.5" ry="4" fill="#7a1f3d"/></g></svg>';
+['titleM','whoM','introM','coachM','winM','failM','mapM'].forEach(id=>$(id).innerHTML=MASCOT);
+const mood=(el,m)=>{el.classList.remove('mood-happy','mood-sad','mood-think');el.classList.add('mood-'+m)};
+['titleM','whoM','introM'].forEach(id=>mood($(id),'happy'));
+(function mk(){const L=['COLOR','MIND','3D'],cs=['#ff4d5e','#ff8a1f','#ffd028','#22c55e','#2f80ff','#9b5cf6','#ff6fb5'];let k=0;$('logo').innerHTML=L.map(w=>'<div>'+Array.from(w).map(ch=>'<span style="color:'+cs[k%7]+';animation-delay:'+(k++*.12)+'s">'+ch+'</span>').join('')+'</div>').join('');
+ let h='';for(let i=0;i<14;i++){const s=R(30,120);h+='<i style="width:'+s+'px;height:'+s+'px;left:'+R(-5,95)+'%;top:'+R(-5,95)+'%;--d:'+R(8,16)+'s;--x:'+R(-40,40)+'px;--y:'+R(-60,-10)+'px;opacity:'+(R(35,85)/100)+'"></i>'}$('bg').innerHTML=h;$('logo2').innerHTML=$('logo').innerHTML})();
+function theme(w,prof,lv){prof=prof||PR;const p=PAL[prof.id][w],a=$('app').style;a.setProperty('--c1',p.c[0]);a.setProperty('--c2',p.c[1]);a.setProperty('--c3',p.c[2]);a.setProperty('--ac',p.a);$('app').dataset.prof=prof.id;curWorld=w;
+ const T=TEX[(w*3+(lv||0))%10],tx=$('tex');tx.style.background=T.bg;tx.style.setProperty('--tc',TCOL[prof.id]);tx.className='tex '+T.m;document.querySelector('meta[name=theme-color]').content=p.c[1]}
+const fx=$('fx');
+function confetti(x,y,n){const cols=COL.map(c=>c.c);n=n||22;for(let i=0;i<n;i++){const d=document.createElement('i');d.className='cf';d.style.cssText='left:'+x+'px;top:'+y+'px;background:'+pick(cols)+';--dx:'+R(-170,170)+'px;--dy:'+R(-280,-70)+'px;--r:'+R(-720,720)+'deg';fx.appendChild(d);d.addEventListener('animationend',()=>d.remove())}}
+const center=el=>{const r=el?el.getBoundingClientRect():$('stage').getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/2]};
+/* ================= screens ================= */
+const screens=['loading','title','who','map','intro','play','win','fail'];let state='loading';
+function show(id,dir){const prev=state;state=id;screens.forEach(s=>{const e=$(s);e.classList.remove('fwd','back');if(s===id){e.classList.add(dir==='back'?'back':'fwd');e.classList.add('on')}else e.classList.remove('on')});ovl=false;['pauseOv','setOv','leaveOv','langOv'].forEach(o=>$(o).classList.remove('on'));syncPause();if(id!=='play'&&id!=='intro')clearT();if(id==='title'||id==='who')theme(6,S.p?PR:PROFS.easy);if(ac&&prev!==id)sfx('whoosh')}
+/* ================= level logic ================= */
+let level=1,mapW=0,PRV=null;
+function lvInfo(l){let type;if(l%10===0)type='boss';else if(l%5===0)type='mixed';else{const nu=Object.keys(TYPES).find(k=>TYPES[k].u===l);if(nu)type=nu;else{const un=unlockedTypes(l);type=un[(l*5+Math.floor(l/un.length))%un.length]}}
+ return{type,t:T('t_'+type),i:T('i_'+type),isNew:TYPES[type].u===l}}
+const unlockedTypes=l=>Object.keys(TYPES).filter(k=>TYPES[k].u<=l);
+const baseT=l=>PR.lo+(PR.hi-PR.lo)*((l-1)/99);
+/* ---------- generators ---------- */
+const mkE=ch=>({k:ch,h:ch});
+const SHAPES=['circle','square','tri','diamond','hex','star'];
+const mkS=(s,ci)=>({k:s+ci,h:'<i class="sh '+s+'" style="--c:'+COL[ci].c+'"></i>'});
+const sw=c=>({k:c.n,a:c.n,h:'<i class="sw'+(c.c==='#ffffff'?' wh':'')+'" style="--c:'+c.c+'"></i>'});
+function mkOpts(ans,prefer,extra){const n=PR.opts-1;let w=samp(prefer.filter(x=>x.k!==ans.k),n);if(w.length<n){const more=samp((extra||[]).filter(x=>x.k!==ans.k&&!w.some(y=>y.k===x.k)),n-w.length);w=w.concat(more)}return shuf([Object.assign({},ans,{ok:true}),...w.map(x=>Object.assign({},x,{ok:false}))])}
+function numOpts(ans,deltas){const ok=v=>v!==ans&&v>=0,seen=new Set(),out=[];const add=a=>a.forEach(d=>{const v=ans+d;if(ok(v)&&!seen.has(v)){seen.add(v);out.push(v)}});add(shuf(deltas));add(shuf([1,-1,2,-2,3,-3,4,-4,5,10]));
+ return shuf([{k:String(ans),h:String(ans),ok:true},...out.slice(0,PR.opts-1).map(v=>({k:String(v),h:String(v),ok:false}))])}
+const tileHTML=(arr,cls)=>arr.map(x=>'<div class="tile '+(cls||'')+'">'+x+'</div>').join('');
+const allItems=()=>Object.values(GR).flatMap(g=>g.items);
+const GEN={
+flash(t){const g=pick(Object.values(GR)),n=Ri(t,3,6),items=samp(g.items,n).map(mkE),kinds=['first','last'];if(t>.15)kinds.push('pos');if(t>.55)kinds.push('pos2last');
+ const kd=pick(kinds);let ai,pr;if(kd==='first'){ai=0;pr=T('first')+' 🥇'}else if(kd==='last'){ai=n-1;pr=T('last')+' 🏁'}else if(kd==='pos'){ai=R(1,n-2);pr=T('numN',{n:ai+1})+' 🔢'}else{ai=n-2;pr=T('sec')}
+ return{mode:'opts',watchPrompt:T('watch')+' 👀',prompt:pr,watch:{items,per:Math.round(780*PR.slow),hold:Math.round(900*PR.slow),then:'cover'},opts:mkOpts(items[ai],items,g.items.map(mkE))}},
+missing(t){const g=pick(Object.values(GR)),n=Ri(t,4,8),items=samp(g.items,n).map(mkE),rm=R(0,n-1);
+ return{mode:'opts',watchPrompt:T('remAll')+' 👀',prompt:T('vanish')+' 🪄',watch:{items,per:230,hold:Math.round((1700+n*190-t*600)*PR.slow),then:'remove',rm},opts:mkOpts(items[rm],items,[])}},
+number(t){const L=PR.soft?4:5,mk={
+ add:()=>{const s=PR.soft?pick([1,2,5,10]):R(2,9),a=R(1,12);return{f:i=>a+i*s,d:s}},
+ sub:()=>{const s=R(2,PR.soft?3:6),a=s*L+R(2,10);return{f:i=>a-i*s,d:s}},
+ dbl:()=>{const a=R(1,4);return{f:i=>a*2**i,d:a*2**(L-1)}},
+ tri:()=>{const a=R(0,6);return{f:i=>a+i*(i+1)/2,d:L}},
+ alt:()=>{const p=R(1,4),q=R(5,9),a=R(1,10);return{f:i=>a+Math.ceil(i/2)*p+Math.floor(i/2)*q,d:p}},
+ sq:()=>{const k=R(1,4);return{f:i=>(i+k)**2,d:2*(L+k)}},
+ fib:()=>{const a=R(1,3),b=R(1,4),ar=[a,b];for(let i=2;i<=L;i++)ar.push(ar[i-1]+ar[i-2]);return{f:i=>ar[i],d:ar[L-1]}},
+ tri3:()=>{const a=R(1,2);return{f:i=>a*3**i,d:a*3**(L-1)}}};
+ const th=[['add',0],['sub',.1],['dbl',.3],['tri',.4],['alt',.45],['sq',.55],['fib',.65],['tri3',.8]].filter(x=>t>=x[1]).map(x=>x[0]);
+ const r=mk[pick(th.length>3&&Math.random()<.6?th.slice(-3):th)]();const terms=Array.from({length:L},(_,i)=>r.f(i)),ans=r.f(L);
+ return{mode:'opts',prompt:T('nextNum')+' 🔢',stageHTML:tileHTML(terms.map(String),'num')+'<div class="tile num q">?</div>',opts:numOpts(ans,[r.d,-r.d])}},
+odd(t){const keys=Object.keys(GR),near=t>.45&&Math.random()<.7;let a,b;if(near){a=pick(['fruit','veg','land','sea','veh','toy']);b=NEAR[a]}else{a=pick(keys);b=pick(keys.filter(k=>k!==a&&NEAR[a]!==k))}
+ const n=Ri(t,4,9),base=samp(GR[a].items,n-1),od=pick(GR[b].items);const tiles=shuf([...base.map(h=>({h,ok:false})),{h:od,ok:true}]);
+ return{mode:'tiles',prompt:T('odd')+' 🕵️',tiles,cols:n<=4?2:3}},
+count(t){const keys=Object.keys(GR),g=GR[pick(keys)],tgt=pick(g.items),N=Ri(t,PR.soft?2:3,9),D=t<.15?0:Ri(t,1,9),others=allItems().filter(x=>x!==tgt);
+ let cells=[...Array(N).fill(tgt),...Array.from({length:D},()=>pick(others))];const cols=Math.ceil(Math.sqrt(cells.length*1.6)),rows=Math.ceil(cells.length/cols);while(cells.length<cols*rows)cells.push('');cells=shuf(cells);
+ const html='<div class="scatter" style="--cols:'+cols+'">'+cells.map(c=>'<span style="transform:rotate('+R(-18,18)+'deg) scale('+(R(88,112)/100)+')">'+c+'</span>').join('')+'</div>';
+ return{mode:'opts',prompt:T('howMany',{x:tgt}),stageHTML:html,opts:numOpts(N,[1,-1,2,-2])}},
+pattern(t){const T0=[[0,1],[0,0,1]],T1=[[0,1,2],[0,1,1],[0,0,1,1]],T2=[[0,1,2,1],[0,0,1,2],[0,1,0,2]],T3=[[0,1,2,3],[0,1,2,2,1],[0,0,1,1,2]];
+ const tpl=pick(t<.2?T0:t<.45?T0.concat(T1):t<.7?T1.concat(T2):T2.concat(T3)),cyc=tpl.length,k=Math.max(...tpl)+1;
+ const useShape=Math.random()<.5;let pool,syms;if(useShape){pool=[];SHAPES.forEach(s=>[0,1,2,3,4,5].forEach(c=>pool.push(mkS(s,c))));syms=[];const ss=samp(SHAPES,k),cc=samp([0,1,2,3,4,5],k);ss.forEach((s,i)=>syms.push(mkS(s,cc[i])))}else{pool=pick(Object.values(GR)).items.map(mkE);syms=samp(pool,k)}
+ const L=Math.min(cyc*2+R(0,1),10),shown=Array.from({length:L},(_,i)=>syms[tpl[i%cyc]]),ans=syms[tpl[L%cyc]];
+ return{mode:'opts',prompt:T('pat')+' 🔮',stageHTML:tileHTML(shown.map(x=>x.h),L>7?'sm':'')+'<div class="tile q '+(L>7?'sm':'')+'">?</div>',opts:mkOpts(ans,syms,pool)}},
+catcount(t){const keys=Object.keys(GR),tk=pick(keys),pool=keys.filter(k=>k!==tk&&NEAR[tk]!==k),N=Ri(t,2,7),M=Ri(t,3,8);
+ const others=samp(pool,2).flatMap(k=>GR[k].items),a=samp(GR[tk].items,N),b=samp(others,M),cells=shuf([...a,...b]);
+ const cols=Math.ceil(Math.sqrt(cells.length*1.6));
+ return{mode:'opts',prompt:T('sortQ',{g:T('g_'+tk)}),stageHTML:'<div class="scatter" style="--cols:'+cols+'">'+cells.map(c=>'<span style="transform:rotate('+R(-14,14)+'deg)">'+c+'</span>').join('')+'</div>',opts:numOpts(N,[1,-1,2,-2])}},
+mathlogic(t){const f=samp(GR.fruit.items,3),[A,B,C]=f;let rows=[],ask,ans;const eq=(syms,res)=>'<div class="eq">'+syms.join(' + ')+' = '+(res===undefined?'<b>?</b>':'<b>'+res+'</b>')+'</div>';let html;
+ if(t<.3){const a=R(1,5),b=R(1,4);ans=a+b;html='<div class="eq">'+Array(a).fill(A).join('')+' + '+Array(b).fill(A).join('')+' = <b>?</b></div>'}
+ else if(t<.62){const a=R(2,9),b=R(2,8);html=eq([A],a)+eq([B],b)+'<div class="eq ask">'+[A,A,B].join(' + ')+' = <b>?</b></div>';ans=2*a+b}
+ else{const a=R(2,8),b=R(1,7),c=R(1,7);html=eq([A,A,A],3*a)+eq([A,B,B],a+2*b)+eq([B,C],b+c)+'<div class="eq ask">'+[C,C,A].join(' + ')+' = <b>?</b></div>';ans=2*c+a}
+ return{mode:'opts',prompt:T('math')+' 🧮',stageHTML:html,stageCls:'',opts:numOpts(ans,[1,-1,2,-2,3])}},
+stroop(t){const cs=samp(COL,Ri(t,4,8)),mode=t<.25?'match':t<.6?'ink':pick(['ink','word']),ink=pick(cs),wc=pick(cs.filter(c=>c!==ink));let html,pr,ans;
+ if(mode==='match'){html='<i class="sw" style="--c:'+ink.c+';font-size:clamp(70px,22vw,120px)"></i>';pr=T('sMatch')+' 🎯';ans=ink}
+ else{html='<div class="bigtxt" style="color:'+ink.c+'">'+T('c'+COL.indexOf(wc))+'</div>';if(mode==='ink'){pr=T('sInk')+' 🎨';ans=ink}else{pr=T('sWord')+' 📖';ans=wc}}
+ return{mode:'opts',prompt:pr,stageHTML:html,stageCls:'dark',opts:mkOpts(sw(ans),cs.map(sw),[])}},
+simon(t){const np=t<.5?4:6,len=Ri(t,3,7);const pads=COL.slice(0,np).map(c=>({c:c.c,h:''}));const order=[];for(let i=0;i<len;i++){let v;do{v=R(0,np-1)}while(i>1&&v===order[i-1]&&v===order[i-2]);order.push(v)}
+ return{mode:'seq',watchPrompt:T('simW')+' ✨',prompt:T('yourTurn')+' 👆',pads,order,rev:false,gap:Math.round((760-t*260)*(PR.soft?1.25:1))}},
+reverse(t){const np=t<.5?4:6,g=pick(Object.values(GR)),em=samp(g.items,np),len=Ri(t,3,np),order=samp([...Array(np).keys()],len);
+ return{mode:'seq',watchPrompt:T('revW')+' 👀',prompt:T('revT')+' 🔄',pads:em.map(h=>({c:'#fff',h,emo:true})),order,rev:true,gap:Math.round((820-t*220)*(PR.soft?1.25:1))}},
+shade(t){const g=Ri(t,3,6),h=R(0,360),d=lerp(24,4,t),L=58,sign=Math.random()<.5?1:-1,idx=R(0,g*g-1);
+ const tiles=Array.from({length:g*g},(_,i)=>({h:'',ok:i===idx,bg:'hsl('+h+',78%,'+(i===idx?L+sign*d:L)+'%)'}));
+ return{mode:'tiles',prompt:T('shadeQ')+' 🔍',tiles,cols:g,shade:true}},
+mix(t){const MC={red:'#ff4d5e',blue:'#2f80ff',yellow:'#ffd028',white:'#ffffff',green:'#22c55e',purple:'#9b5cf6',orange:'#ff8a1f',pink:'#ff9ecb',sky:'#8fd8ff'},RC=[['red','blue','purple'],['red','yellow','orange'],['blue','yellow','green'],['red','white','pink'],['blue','white','sky']];
+ const S1=n=>({n:n.toUpperCase(),c:MC[n]}),dot=n=>'<i class="sw'+(n==='white'?' wh':'')+'" style="--c:'+MC[n]+';font-size:clamp(40px,12vw,70px)"></i>',rec=pick(RC),rev=t>.4&&Math.random()<.5;
+ if(!rev){const html='<div class="eq">'+dot(rec[0])+' + '+dot(rec[1])+' = <b>?</b></div>';const wrong=Object.keys(MC).filter(k=>k!==rec[2]);return{mode:'opts',prompt:T('mixQ')+' 🧪',stageHTML:html,opts:mkOpts(sw(S1(rec[2])),wrong.map(k=>sw(S1(k))),[])}}
+ const html='<div class="eq">'+dot(rec[2])+' = '+dot(rec[0])+' + <b>?</b></div>';const wrong=Object.keys(MC).filter(k=>k!==rec[1]);return{mode:'opts',prompt:T('mixM')+' 🧪',stageHTML:html,opts:mkOpts(sw(S1(rec[1])),wrong.map(k=>sw(S1(k))),[])}}
+};
+/* ---------- play engine ---------- */
+let cur=null,qi=0,Q=3,hearts=3,maxH=3,mistakes=0,streak=0,best=0,right=0,locked=true,pos=0,pads=[],exp=[],lvType='flash',baseTv=0,lastType='',lvPts=0;
+const say=t=>{const b=$('bubble');b.textContent=t;b.style.animation='none';void b.offsetWidth;b.style.animation=''};
+function renderHearts(pop){$('hearts').innerHTML=Array.from({length:maxH},(_,i)=>'<b class="'+(i>=hearts?'off':'')+(pop&&i===hearts?' pop':'')+'">♥</b>').join('')}
+function renderDots(){$('dots').innerHTML=Array.from({length:Q},(_,i)=>'<i class="'+(i<qi?'done':i===qi?'cur':'')+'"></i>').join('')}
+function setHint(){$('hintN').textContent=S.hints;$('mapHints').textContent=S.hints}
+function startLevel(n){level=n;PRV=lvInfo(n);theme(Math.floor((n-1)/10),PR,(n-1)%10);clearT();
+ $('introLv').textContent=T('lvl')+' '+n;$('introT').textContent=PRV.t;$('introI').textContent=PRV.i;$('newRib').style.display=(PRV.isNew&&!S.seen[PRV.type])?'block':'none';
+ show('intro');sfx('go');const known=S.seen[PRV.type]&&!PRV.isNew;if(known)later(1500,beginRound)}
+function beginRound(){if(state!=='intro')return;clearT();S.seen[PRV.type]=1;save();lvType=PRV.type;baseTv=baseT(level);Q=PR.qs+(baseTv>.6?1:0)+(lvType==='boss'?1:0);maxH=PR.hearts;hearts=maxH;qi=0;mistakes=0;streak=0;best=0;right=0;lastType='';lvPts=0;
+ $('pLv').textContent=T('lvl')+' '+level;renderHearts();$('streak').classList.remove('on');setHint();show('play');nextQ()}
+function nextQ(){clearT();renderDots();const t=clamp(baseTv+qi*.025,0,1);let type=lvType;if(type==='mixed'||type==='boss'){const un=unlockedTypes(level).filter(k=>k!=='mixed'&&k!=='boss');type=pick(un.filter(k=>k!==lastType).length?un.filter(k=>k!==lastType):un)}lastType=type;
+ const q=GEN[type](t);q.type=type;cur=q;render(q)}
+function render(q){locked=true;const st=$('stage');st.style.animation='none';void st.offsetWidth;st.style.animation='';st.className='stage'+(q.stageCls?' '+q.stageCls:'');st.innerHTML='';const an=$('answers');an.innerHTML='';an.className='answers';mood($('coachM'),'think');
+ if(q.mode==='seq'){an.style.display='none';runSeq(q);return}an.style.display='';
+ if(q.mode==='opts'){an.classList.toggle('n3',q.opts.length===3);buildOpts(q,!!q.watch);if(q.watch){say(q.watchPrompt);runWatch(q)}else{st.innerHTML=q.stageHTML||'';say(q.prompt);locked=false}}
+ else if(q.mode==='tiles'){an.style.display='none';st.classList.add('grid');st.style.setProperty('--cols',q.cols);q.tiles.forEach(o=>{const d=document.createElement('button');d.className='tile tap'+(q.shade?' shade':'');if(q.shade)d.style.background=o.bg;else d.innerHTML=o.h;if(TEST&&o.ok)d.dataset.ok=1;d.onclick=()=>choose(d,o.ok);st.appendChild(d)});say(q.prompt);locked=false}}
+function buildOpts(q,wait){const an=$('answers');q.opts.forEach((o,i)=>{const b=document.createElement('button');b.className='opt o'+i+(wait?' wait':'');b.style.setProperty('--i',i);b.innerHTML=o.h;if(o.a)b.setAttribute('aria-label',o.a);if(TEST&&o.ok)b.dataset.ok=1;b.onclick=()=>choose(b,o.ok);an.appendChild(b)})}
+function runWatch(q){const w=q.watch,st=$('stage'),els=w.items.map(it=>{const d=document.createElement('div');d.className='tile pre'+(w.items.length>6?' sm':'');d.innerHTML=it.h;st.appendChild(d);return d});
+ els.forEach((d,i)=>later(450+i*w.per,()=>{d.classList.remove('pre');d.classList.add('pop');sfx('pad',i)}));let tm=450+(els.length-1)*w.per+w.hold;
+ if(w.then==='cover'){later(tm,()=>{sfx('flip');els.forEach((d,i)=>later(i*70,()=>{d.classList.add('flip');later(180,()=>{d.innerHTML='<span class="qm">?</span>';d.classList.add('covered')})}))});later(tm+els.length*70+520,()=>openOpts(q))}
+ else{later(tm,()=>{const d=els[w.rm],[x,y]=center(d);d.classList.add('vanish');sfx('poof');confetti(x,y,10);later(460,()=>{d.className='tile empty'+(els.length>6?' sm':'');d.innerHTML=''})});later(tm+950,()=>openOpts(q))}}
+function openOpts(q){document.querySelectorAll('.opt.wait').forEach(b=>b.classList.remove('wait'));say(q.prompt);locked=false}
+function runSeq(q){const st=$('stage');st.className='stage';st.innerHTML='<div class="pads p'+q.pads.length+'" id="padbox"></div>';const box=$('padbox');pads=q.pads.map((p,i)=>{const b=document.createElement('button');b.className='pad'+(p.emo?' emo':'');b.style.setProperty('--c',p.c);b.innerHTML=p.h||'';b.setAttribute('aria-label','Pad '+(i+1));b.onclick=()=>padTap(i);box.appendChild(b);return b});exp=q.rev?q.order.slice().reverse():q.order;playSeq()}
+function playSeq(){const q=cur;locked=true;pos=0;say(q.watchPrompt);mood($('coachM'),'think');q.order.forEach((pi,i)=>later(800+i*q.gap,()=>lightPad(pi)));later(800+q.order.length*q.gap+250,()=>{say(q.prompt);locked=false;pos=0})}
+function lightPad(i){const p=pads[i];if(!p)return;p.classList.add('lit');sfx('pad',i);later(Math.min(380,cur.gap*.6),()=>p.classList.remove('lit'))}
+function padTap(i){if(locked||paused())return;lightPad(i);if(i===exp[pos]){pos++;if(pos>=exp.length){locked=true;later(450,()=>correct(null))}}else{locked=true;wrong(pads[i],true)}}
+function choose(el,ok){if(locked||paused())return;ok?correct(el):wrong(el)}
+const praise=()=>pick([T('p0')+' 👍',T('p1')+' ⭐',T('p2')+' 🎉',T('p3')+' 🌟']);
+function correct(el){locked=true;right++;streak++;best=Math.max(best,streak);const pts=100+Math.min(streak,5)*20;S.score+=pts;S.best=Math.max(S.best||0,S.score);lvPts+=pts;if(el)el.classList.add('right');const[x,y]=center(el);confetti(x,y,el?18:26);sfx('good',streak);if(streak>=3)later(260,()=>sfx('streak',streak));cheer($('coachM'));flash('good');ring(x,y);popText(x,y-24,'+'+pts);mood($('coachM'),'happy');say(streak>=3?T('fire')+' 🔥':praise());
+ const sk=$('streak');if(streak>=2){sk.textContent='🔥 x'+streak;sk.classList.remove('on');void sk.offsetWidth;sk.classList.add('on')}qi++;renderDots();
+ later(1000,()=>{if(qi>=Q)winLevel();else nextQ()})}
+function wrong(el,isSeq){mistakes++;hearts=Math.max(0,hearts-1);streak=0;$('streak').classList.remove('on');el&&el.classList.add('wrong');sfx('bad');sfx('heart');oops($('coachM'));flash('bad');mood($('coachM'),'sad');renderHearts(true);{const h=$('hearts').children[hearts];if(h){const[hx,hy]=center(h);emojiBurst(hx,hy,['💔','♥'],6)}}const st=$('stage');st.classList.remove('shake');void st.offsetWidth;st.classList.add('shake');
+ if(hearts<=0){locked=true;say(T('outH')+' 💔');later(1100,failLevel);return}say(isSeq?T('oopsW')+' 👀':T('oops')+' 💪');
+ if(isSeq)later(1100,()=>{pads.forEach(p=>p.classList.remove('wrong'));playSeq()});else{locked=false;later(900,()=>mood($('coachM'),'think'))}}
+$('hintBtn').onclick=()=>{if(state!=='play'||locked||paused()||S.hints<=0)return;const q=cur;
+ if(q.mode==='seq'){S.hints--;save();setHint();playSeq();return}
+ const okIdx=q.mode==='tiles'?q.tiles.findIndex(o=>o.ok):q.opts.findIndex(o=>o.ok),all=[...document.querySelectorAll(q.mode==='tiles'?'#stage .tile.tap':'#answers .opt')];
+ const cand=all.filter((e,i)=>i!==okIdx&&!e.classList.contains('gone')&&!e.classList.contains('wrong'));if(cand.length<=1)return;pick(cand).classList.add('gone');S.hints--;save();setHint();sfx('hint');say(T('hintUsed')+' 💡')};
+function winLevel(){clearT();const stars=mistakes===0?3:mistakes===1?2:1,prev=S.st[level]||0;S.st[level]=Math.max(prev,stars);if(stars===3&&prev<3)S.hints=Math.min(9,S.hints+1);save();
+ SDK.sendScore(S.best);
+ $('winLv').textContent=T('lvl')+' '+level+' '+T('complete');$('winT').textContent=level===100?T('legendWin')+' 👑':pick([T('w0'),T('w1'),T('w2')]);$('allDoneTxt').style.display=level>=100?'':'none';
+ $('winStats').innerHTML='<div class="stat">'+T('correct')+'<b>'+right+'/'+Q+'</b></div><div class="stat">'+T('streak')+'<b>🔥 '+best+'</b></div><div class="stat">'+T('hearts')+'<b>♥ '+hearts+'</b></div><div class="stat">'+T('points')+'<b>⭐ +'+lvPts+'</b></div>'+(stars===3&&prev<3?'<div class="stat">'+T('bonus')+'<b>💡 +1</b></div>':'');
+ const sI=[...$('winStars').children];sI.forEach(i=>i.className='');show('win');sfx('win');
+ sI.forEach((e,i)=>{if(i<stars)later(500+i*450,()=>{e.className='on';sfx('star',i);const[x,y]=center(e);confetti(x,y,16)})});later(500+stars*450,()=>confetti(innerWidth/2,innerHeight/3,36));
+ $('nextBtn').style.display=level>=100?'none':'';mapW=Math.floor((Math.min(unlocked(),100)-1)/10)}
+function failLevel(){clearT();sfx('fail');$('failLv').textContent=T('lvl')+' '+level;$('failTxt').textContent=right>0?T('failS',{a:right,b:Q}):T('failG')+' 🧠';show('fail')}
+/* ---------- map ---------- */
+function renderMap(){theme(mapW);const W=WORLDS[mapW],u=unlocked(),first=mapW*10+1;$('wIcon').textContent=W.i;$('wName').textContent=T('world')+' '+(mapW+1);$('wNum').textContent=(mapW+1)+' / 10';
+ const g=$('lgrid');g.innerHTML='';let done=0;for(let i=first;i<first+10;i++){const s=S.st[i]||0;if(s)done++;const b=document.createElement('button'),lock=i>u;b.className='lt '+(s?'done':lock?'locked':'open')+(i===u?' cur':'');b.style.setProperty('--i',i-first);b.setAttribute('aria-label',T('lvl')+' '+i);
+  b.innerHTML=lock?'<span>🔒</span>':'<span>'+i+'</span><span class="sts">'+(s?'★'.repeat(s)+'<u>'+'★'.repeat(3-s)+'</u>':'')+'</span>';if(!lock)b.onclick=()=>startLevel(i);g.appendChild(b)}
+ $('wBar').style.width=done*10+'%';{const nl=Math.min(u,100),li=lvInfo(nl),all=!!S.st[100];const bub=$('mapBub');bub.textContent='';const sp=document.createElement('span');if(all)sp.textContent=T('allDone')+' 🏆';else{sp.textContent=T('next')+': ';const bb=document.createElement('b');bb.textContent=T('lvl')+' '+nl;sp.appendChild(bb);sp.appendChild(document.createTextNode(' — '+li.t+(li.isNew&&!S.seen[li.type]?' ✨ '+T('newt'):'')))}bub.appendChild(sp);$('mapPlay').style.display=all?'none':'';$('mapPlay').textContent='▶ '+T('playLvl')+' '+nl}$('totStars').textContent=totalStars();setHint();$('wPrev').disabled=mapW===0;$('wNext').disabled=mapW===9;$('wDots').innerHTML=WORLDS.map((_,i)=>'<i class="'+(i===mapW?'on':'')+'"></i>').join('')}
+function goMap(dir){mapW=Math.floor((unlocked()-1)/10);renderMap();show('map',dir)}
+$('wPrev').onclick=()=>{mapW=Math.max(0,mapW-1);renderMap()};$('wNext').onclick=()=>{mapW=Math.min(9,mapW+1);renderMap()};
+/* ---------- fx helpers ---------- */
+function popText(x,y,txt){const d=document.createElement('div');d.className='pt';d.style.left=x+'px';d.style.top=y+'px';d.textContent=txt;fx.appendChild(d);d.addEventListener('animationend',()=>d.remove())}
+function ring(x,y){const d=document.createElement('i');d.className='rg';d.style.left=x+'px';d.style.top=y+'px';fx.appendChild(d);d.addEventListener('animationend',()=>d.remove())}
+function emojiBurst(x,y,ch,n){for(let i=0;i<n;i++){const d=document.createElement('span');d.className='ep';d.textContent=pick(ch);d.style.cssText='left:'+x+'px;top:'+y+'px;--dx:'+R(-110,110)+'px;--dy:'+R(-160,-30)+'px;--r:'+R(-300,300)+'deg';fx.appendChild(d);d.addEventListener('animationend',()=>d.remove())}}
+function flash(k){const f=$('flash');f.className='flash';void f.offsetWidth;f.className='flash '+k}
+function react(el,c){el.classList.remove('cheer','oops');void el.offsetWidth;el.classList.add(c);setTimeout(()=>el.classList.remove(c),800)}
+const cheer=el=>react(el,'cheer'),oops=el=>react(el,'oops');
+function syncSnd(){document.querySelectorAll('.sndbtn').forEach(b=>{b.textContent='🎵';b.setAttribute('aria-pressed',S.music?'true':'false');b.classList.toggle('off',!S.music)})}
+/* ---------- profile + settings ---------- */
+const PDESC={easy:'dEasy',pro:'dPro',legend:'dLegend'};
+function drawWho(){$('whoCards').innerHTML=Object.values(PROFS).map(p=>'<button class="pcard t-'+p.id+(S.p===p.id?' sel':'')+'" data-p="'+p.id+'"><span class="e">'+p.e+'</span><span><b>'+T(p.id)+'</b><small>'+T(PDESC[p.id])+'</small></span></button>').join('');
+ document.querySelectorAll('.pcard').forEach(b=>b.onclick=()=>{S.p=b.dataset.p;PR=PROFS[S.p];save();sfx('good');theme(6,PR);document.querySelectorAll('.pcard').forEach(c=>c.classList.toggle('sel',c===b));setTimeout(()=>{if(state==='who')goMap()},480)})}
+function drawSet(){document.querySelectorAll('.tog').forEach(t=>t.classList.toggle('on',!!S[t.dataset.tog]));const inG=state==='play'||state==='intro';$('chips').style.display=$('plabel').style.display=inG?'none':'';
+ $('chips').innerHTML=Object.values(PROFS).map(p=>'<button class="chip'+(S.p===p.id?' sel':'')+'" data-p="'+p.id+'">'+p.e+'<br>'+T(p.id)+'</button>').join('');
+ document.querySelectorAll('#chips .chip').forEach(b=>b.onclick=()=>{S.p=b.dataset.p;PR=PROFS[S.p];save();drawSet();if(state==='map')theme(mapW,PR,0)});
+ $('langBtn').textContent=LANGS[LANG].n}
+function drawLangGrid(){$('langGrid').innerHTML=LANG_ORDER.map(c=>'<button class="chip'+(c===LANG?' sel':'')+'" data-l="'+c+'">'+LANGS[c].n+(LANGS[c].b?' <small>β</small>':'')+'</button>').join('');
+ document.querySelectorAll('#langGrid .chip').forEach(b=>b.onclick=()=>{setLang(b.dataset.l,true);drawLangGrid()})}
+/* Playables: no master mute button. Quick button = music only; Settings has Effects + Music. */
+document.querySelectorAll('.tog').forEach(t=>t.onclick=()=>{const k=t.dataset.tog;S[k]=!S[k];save();drawSet();syncSnd();if(S.sfx||S.music)AC()});
+document.querySelectorAll('.sndbtn').forEach(b=>b.onclick=()=>{S.music=!S.music;save();syncSnd();drawSet();if(S.music)AC()});
+/* overlays: ONLY pause / leave overlays freeze the game. Settings & language never do. */
+const NP=id=>id==='setOv'||id==='langOv';
+function openOv(id){if(!NP(id))ovl=true;$(id).classList.add('on');syncPause();drawSet()}
+function closeOv(id){$(id).classList.remove('on');if(!NP(id))ovl=false;syncPause()}
+function openPause(){if((state==='play'||state==='intro')&&!ovl)openOv('pauseOv')}
+$('pPause').onclick=openPause;$('resumeBtn').onclick=()=>closeOv('pauseOv');$('restartBtn').onclick=()=>{closeOv('pauseOv');startLevel(level)};$('quitBtn').onclick=()=>{closeOv('pauseOv');goMap('back')};$('pauseSet').onclick=()=>openOv('setOv');
+$('titleSet').onclick=()=>openOv('setOv');$('mapSet').onclick=()=>openOv('setOv');$('setClose').onclick=()=>closeOv('setOv');
+$('titleLang').onclick=()=>{drawLangGrid();openOv('langOv')};$('langBtn').onclick=()=>{drawLangGrid();openOv('langOv')};$('langClose').onclick=()=>closeOv('langOv');
+$('testSnd').onclick=()=>{tryUnlock();sfx('good',3,true);checkToastSoon()};
+$('leaveStay').onclick=()=>closeOv('leaveOv');$('leaveYes').onclick=()=>{closeOv('leaveOv');goMap('back')};
+let rc=0;$('resetBtn').onclick=e=>{const lbl='🗑 '+T('reset');if(++rc<2){e.target.textContent='⚠️ '+T('confirm');setTimeout(()=>{rc=0;$('resetBtn').textContent='🗑 '+T('reset')},3000);return}rc=0;e.target.textContent=lbl;S={p:S.p,st:{},hints:3,sfx:S.sfx,music:S.music,sound:true,seen:{},score:0,best:S.best||0,v:4,lang:S.lang};save();closeOv('setOv');goMap()};
+/* ---------- buttons ---------- */
+$('playBtn').onclick=async()=>{await loaded;if(!S.p){drawWho();show('who')}else goMap()};
+$('whoBack').onclick=()=>show('title','back');$('mapHome').onclick=()=>show('title','back');$('introBack').onclick=()=>goMap('back');$('playBack').onclick=()=>openOv('leaveOv');$('winBack').onclick=()=>goMap('back');$('failBack').onclick=()=>goMap('back');
+$('mapPlay').onclick=()=>startLevel(Math.min(unlocked(),100));$('goBtn').onclick=beginRound;
+$('nextBtn').onclick=()=>startLevel(Math.min(100,level+1));$('replayBtn').onclick=()=>startLevel(level);$('winMap').onclick=()=>goMap('back');$('retryBtn').onclick=()=>startLevel(level);$('failMap').onclick=()=>goMap('back');
+/* Esc closes modals only (never preventDefault, never navigates) */
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){const o=['langOv','setOv','leaveOv','pauseOv'].find(id=>$(id).classList.contains('on'));if(o)closeOv(o);return}
+ if(state==='play'&&!locked&&e.key>='1'&&e.key<='4'){const b=$('answers').children[+e.key-1];b&&b.click()}if(state==='intro'&&(e.key==='Enter'||e.key===' '))beginRound()});
+/* ---------- boot: loading screen -> firstFrameReady -> load save + language -> title -> gameReady ---------- */
+syncSnd();
+const firstFrame=new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(()=>{SDK.firstFrameReady();r()})));
+loaded=(async()=>{
+ await firstFrame;
+ try{await load()}catch(e){}
+ try{await detectLang()}catch(e){}
+ applyLang();syncSnd();setHint();show('title');
+ requestAnimationFrame(()=>requestAnimationFrame(()=>SDK.gameReady()));
+})();
+if(TEST)window.__cm={AC,sfx,get ac(){return ac},theme,GEN,setProf:p=>{PR=PROFS[p]},PROFS,lvInfo,get cur(){return cur},get S(){return S},unlocked,startLevel,beginRound,get state(){return state},TYPES,T,setLang,LANGS,KEYS,set level(v){level=v},get LANG(){return LANG}};
+})();
+</script>
+</body>
+</html>
